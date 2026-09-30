@@ -9,8 +9,7 @@ from server import theme, images
 from server.site import Site
 from server.errors import ApiError
 
-OLD_CSS = Path.home() / 'neocities' / 'style.css'        # оригинал до выноса токенов (есть только на машине автора)
-REF_CSS = HERE / 'ref' / 'style-tokens.css'              # его копия в репозитории
+REF_CSS = HERE / 'ref' / 'style-tokens.css'              # :root и @font-face старого style.css entropic division (до adopt)
 
 
 def decls(css):
@@ -58,8 +57,7 @@ class Theme(unittest.TestCase):
         self.assertEqual(theme.resolve_kind(self.t, 'footer', {'class': 'shared'}), 'footer')
 
     def test_css_equals_old_tokens(self):
-        ref = OLD_CSS if OLD_CSS.exists() else REF_CSS
-        if not ref.exists(): self.skipTest('нет эталонного style.css')
+        ref = REF_CSS
         want = decls(ref.read_text(encoding='utf-8')); have = decls(theme.theme_css(self.t))
         self.assertEqual(want, have)
 

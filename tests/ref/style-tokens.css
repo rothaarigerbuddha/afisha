@@ -30,5 +30,6 @@
   --term:  "Tiny5", "Courier New", monospace;
 
   color-scheme: dark;
+}
 
 :root { --column-max: 900px; }

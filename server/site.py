@@ -60,10 +60,16 @@ class Site:
             old.unlink()
 
     # ── настройки холста (_afisha/site.json)
+    def _settings_source(self):
+        # старый сайт (до adopt) держит размеры в tools/site.json — читаем оттуда, пока нет _afisha/site.json
+        if self.settings_file.exists(): return self.settings_file
+        old = self.root / 'tools' / 'site.json'
+        return old if old.exists() else None
+
     def settings(self):
-        d = dict(SETTINGS_DEF)
-        if self.settings_file.exists():
-            try: d.update({k: int(v) for k, v in json.loads(self.read(self.settings_file)).items() if k in d})
+        d = dict(SETTINGS_DEF); f = self._settings_source()
+        if f:
+            try: d.update({k: int(v) for k, v in json.loads(self.read(f)).items() if k in d})
             except (ValueError, AttributeError): pass
         return d
 

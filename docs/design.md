@@ -84,3 +84,17 @@
 - Консоль: `line_buffering` — иначе при выводе в файл (тесты, службы) стартовые сообщения не видны.
 - README ru/en; Windows-инструкция: без «legacy utilities» (convert.exe), пути ближе к корню диска.
 - Windows на этой машине не проверялся — гейт перед раздачей (план).
+
+## Шаг 6 (01.10.2026): adopt ~/neocities
+
+- `server/adopt.py`: копия сайта в соседнюю папку `<сайт>-adopt-<время>` (никогда внутрь; без копии adopt не
+  начинается), `tools/{site.json,cutouts.txt,backups,neocities.key}` → `_afisha/`, тема = манифест forest +
+  значения из `:root`/`@font-face` старого style.css (проверено: извлечение совпало с шаблоном 1:1), style.css без
+  токенов и с color-mix, `<link theme.css>` на всех страницах (kit включая), `editor.*` и `tools/` удаляются.
+- Оракул: скриншоты index при 1920 и 400 до/после — AE 0 (fuzz 2%). **Ловушка**: «до» надо снимать с честным
+  site.json — legacy-запуск без `_afisha/site.json` генерировал layout.css на 1400 вместо 1180 и перезаписал файл
+  пользователя; теперь `Site.settings()` в legacy читает `tools/site.json`, а «до» снимался из git-коммита.
+- Legacy-запуск успевает создать пустой `_afisha/cutouts.txt` — adopt замещает его версией из tools/, если в
+  существующем нет строк.
+- `kill` сервера: SIGTERM → KeyboardInterrupt, чтобы `finally` снял `_afisha/lock`.
+- История v1–v3 старого редактора — `docs/editor-design-v1-v3.md`; fish-функция `forest` теперь запускает afisha.

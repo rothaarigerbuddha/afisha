@@ -5,6 +5,7 @@
   python3 afisha.py new <папка> [--template forest] [--title …]      создать сайт из шаблона
   python3 afisha.py check [<папка>]                                 проверить зависимости
   python3 afisha.py process <папка> [--all-bg]                      пересобрать картинки
+  python3 afisha.py adopt <папка>                                   перевести старый сайт (tools/, токены в style.css) на afisha
 
 Нужны Python 3.9+ и ImageMagick 7 (magick). Без ImageMagick редактор работает, картинки кладутся как есть."""
 import argparse, os, re, shutil, sys, threading, time, webbrowser
@@ -18,7 +19,7 @@ try: sys.stdout.reconfigure(encoding='utf-8', errors='replace', line_buffering=T
 except AttributeError: pass
 
 from server.site import Site
-from server import app, images, layout, theme
+from server import app, images, layout, theme, adopt as adopt_mod
 from server.errors import ApiError
 
 TEMPLATES = HERE / 'templates'
@@ -64,6 +65,8 @@ def cmd_serve(a):
     url = f'http://127.0.0.1:{port}/_editor/editor.html'
     say('редактор:', url); say('сайт:    ', f'http://127.0.0.1:{port}/'); say('Ctrl+C — выключить')
     if not a.no_browser: threading.Timer(0.5, lambda: webbrowser.open(url)).start()
+    import signal
+    signal.signal(signal.SIGTERM, lambda *_: (_ for _ in ()).throw(KeyboardInterrupt()))   # kill → тихий выход и снятие lock
     try: app.serve(site, port, tests=a.tests)
     finally:
         try: lock.unlink()
@@ -122,9 +125,17 @@ def cmd_process(a):
     say('записано:', ', '.join(w) or 'ничего')
 
 
+def cmd_adopt(a):
+    root = Path(a.site).expanduser()
+    if not root.is_dir() or not (root / 'index.html').exists(): say(f'в {root} нет index.html'); sys.exit(2)
+    check_magick()
+    try: adopt_mod.adopt(root, say)
+    except ApiError as e: say('adopt остановлен:', e.msg, ('— ' + e.hint) if e.hint else ''); sys.exit(1)
+
+
 def main(argv=None):
     argv = list(sys.argv[1:] if argv is None else argv)
-    cmds = {'serve', 'new', 'check', 'process'}
+    cmds = {'serve', 'new', 'check', 'process', 'adopt'}
     if not argv or argv[0] not in cmds and not argv[0].startswith('-'): argv.insert(0, 'serve')
     p = argparse.ArgumentParser(prog='afisha', description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     sub = p.add_subparsers(dest='cmd')
@@ -134,10 +145,11 @@ def main(argv=None):
     n.add_argument('--title', default='мой сайт'); n.add_argument('--lang', default='ru')
     c = sub.add_parser('check', help='проверить зависимости'); c.add_argument('site', nargs='?')
     r = sub.add_parser('process', help='пересобрать картинки'); r.add_argument('site'); r.add_argument('--all-bg', action='store_true')
+    d = sub.add_parser('adopt', help='перевести старый сайт на afisha'); d.add_argument('site')
     a = p.parse_args(argv)
     a.port_given = '--port' in argv
     if not a.cmd: p.print_help(); return
-    try: {'serve': cmd_serve, 'new': cmd_new, 'check': cmd_check, 'process': cmd_process}[a.cmd](a)
+    try: {'serve': cmd_serve, 'new': cmd_new, 'check': cmd_check, 'process': cmd_process, 'adopt': cmd_adopt}[a.cmd](a)
     except ApiError as e:
         say('ошибка:', e.msg, ('— ' + e.hint) if e.hint else ''); sys.exit(1)
 

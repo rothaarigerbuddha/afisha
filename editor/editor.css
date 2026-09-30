@@ -41,6 +41,19 @@ code { color: var(--paper); }
    заданы явно, чтобы стол прокручивался */
 #sheet { position: relative; margin: 0 auto; box-shadow: 0 0 0 1px var(--moss), 0 12px 48px rgba(0,0,0,.65); }
 #page { border: 0; display: block; width: 1920px; height: 1080px; transform-origin: 0 0; background: var(--night); }
+#palette-add { display: flex; flex-direction: column; gap: 6px; }
+#palette-add button:disabled { opacity: .45; cursor: default; }
+/* подсказка к ошибке сервера ({error, hint}) */
+#hintbox { position: absolute; z-index: 6; right: 12px; top: 48px; max-width: 420px; display: flex; gap: 8px; align-items: flex-start; padding: 8px 10px; background: var(--pine); border: 1px solid var(--blood); color: var(--mist); font-size: 13px; box-shadow: 0 4px 14px rgba(0,0,0,.5); }
+#hintbox button { padding: 0 5px; font-size: 12px; }
+/* модалка «тема» */
+.theme { display: grid; grid-template-columns: 1fr 1fr; gap: 10px 24px; }
+.theme h3 { grid-column: 1 / -1; }
+.theme .row { grid-template-columns: 150px 1fr; }
+.theme input[type=color] { width: 44px; height: 26px; padding: 0 2px; background: var(--night); border: 1px solid var(--moss); }
+.theme .sw { display: inline-block; width: 14px; height: 14px; border: 1px solid var(--moss); vertical-align: middle; margin-right: 6px; }
+.theme .actions { grid-column: 1 / -1; }
+.theme .warn { grid-column: 1 / -1; color: #e0a090; font-size: 12px; }
 /* панель свойств */
 .props .row { display: grid; grid-template-columns: 90px 1fr; gap: 6px 8px; align-items: center; margin: 4px 0; }
 .props .row label { color: var(--fog); font-size: 12px; }

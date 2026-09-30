@@ -47,6 +47,10 @@ def cmd_serve(a):
     site = open_site(a.site)
     check_magick()
     layout.ensure_layout(site)
+    th, th_err, legacy = theme.load(site)
+    if th_err: say('тема:', th_err, '— пока используется тема шаблона, панель «тема» покажет ошибку')
+    elif legacy: say('старый сайт без _afisha/theme.json: тема читается из style.css, панель «тема» недоступна')
+    else: theme.ensure_theme_css(site)
     port = a.port
     if not app.port_free(port):
         if a.port_given: say(f'порт {port} занят'); sys.exit(2)
@@ -78,7 +82,7 @@ def cmd_new(a):
         html = site.read(blank).replace('{title}', a.title).replace('{lang}', a.lang)
         site.write(root / 'index.html', html); blank.unlink()
     s = site.settings_all(); s.setdefault('title', a.title); s.setdefault('lang', a.lang); site.settings_write(s)
-    layout.ensure_layout(site)
+    layout.ensure_layout(site); theme.ensure_theme_css(site)
     check_magick()
     with images.PROCESS_LOCK:
         images.process_all(site, theme.images_cfg(site), theme.cursors_cfg(site), active_bg=theme.background(site) or 'all')

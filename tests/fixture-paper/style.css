@@ -1,0 +1,21 @@
+/* тема paper — минимальная структура для теста независимости редактора от темы forest */
+* { box-sizing: border-box; }
+html, body { margin: 0; }
+body { background: var(--sand); color: var(--ink); font-family: var(--print); font-size: 16px; line-height: 1.4; }
+.bg { position: fixed; inset: 0; background: var(--sand) var(--bg-image) center / cover no-repeat; }
+.page { position: relative; width: var(--l-page, var(--poster, 1400px)); margin: 0 auto; padding: 28px 16px 60px; }
+.ghosts { position: absolute; inset: 0; pointer-events: none; }
+.ghost { position: absolute; left: var(--x, 0); top: var(--y, 0); width: var(--w, 40%); opacity: var(--o, 1); }
+.stage { position: relative; display: flex; flex-direction: column; }
+.stage > * { position: var(--l-pos, absolute); left: var(--x, 0px); top: var(--y, 0px); width: var(--l-w, var(--w, auto)); order: var(--m, 0); min-width: 0; margin: 0 0 18px; }
+.stage > footer { position: static; width: auto; margin-top: var(--l-ft, var(--y, 0px)); border-top: 1px solid var(--ink); padding-top: 8px; font-size: 13px; }
+.stage.flow { --l-pos: static; --l-w: auto; --l-ft: 0px; }
+.note { background: #fff; border: 1px solid var(--ink); padding: 12px 14px; text-align: var(--align, start); }
+.note p { margin: 0 0 8px; }
+.photo { margin: 0; }
+.photo img { display: block; width: 100%; }
+.photo figcaption { font-size: 12px; color: var(--sky); }
+.c-sand { color: var(--sand); } .c-sky { color: var(--sky); }
+.stage > .dev { mix-blend-mode: var(--blend, normal); opacity: var(--op, 1); }
+.reveal { animation: reveal .6s ease-out backwards; }
+@keyframes reveal { from { opacity: 0; } }

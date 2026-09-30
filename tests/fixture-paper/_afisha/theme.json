@@ -1,0 +1,172 @@
+{
+ "afisha": 1,
+ "name": "paper",
+ "label": {
+  "ru": "бумага",
+  "en": "paper"
+ },
+ "colors": [
+  {
+   "id": "sand",
+   "value": "#e9dcc0",
+   "label": {
+    "ru": "песок — фон",
+    "en": "sand"
+   }
+  },
+  {
+   "id": "ink",
+   "value": "#222222",
+   "label": {
+    "ru": "чернила",
+    "en": "ink"
+   }
+  },
+  {
+   "id": "sky",
+   "value": "#4a7a9a",
+   "label": {
+    "ru": "небо — акцент",
+    "en": "sky"
+   }
+  }
+ ],
+ "vars": {
+  "column-max": "760px"
+ },
+ "fonts": {
+  "faces": [],
+  "stacks": {
+   "print": "Georgia, serif"
+  },
+  "labels": {
+   "print": {
+    "ru": "текст",
+    "en": "text"
+   }
+  }
+ },
+ "background": {
+  "active": "paper"
+ },
+ "color_scheme": "light",
+ "screen": [],
+ "edit": {
+  "silence": [
+   ".reveal"
+  ],
+  "css": ""
+ },
+ "images": {
+  "bg": {
+   "label": {
+    "ru": "фон",
+    "en": "background"
+   },
+   "match": "^bg-",
+   "upload": true,
+   "mode": "dither",
+   "width": 1200,
+   "colors": 32,
+   "modulate": "100,100,100",
+   "brightness_contrast": "0x0",
+   "quality": 80
+  },
+  "pic": {
+   "label": {
+    "ru": "фото",
+    "en": "photo"
+   },
+   "match": "\\.(jpg|jpeg)$",
+   "upload": true,
+   "mode": "dither",
+   "width": 800,
+   "colors": 32,
+   "modulate": "100,100,100",
+   "quality": 80
+  }
+ },
+ "text": {
+  "palette": [
+   "sand",
+   "sky"
+  ],
+  "keep_span": []
+ },
+ "dev": {
+  "op": {
+   "label": {
+    "ru": "прозрачность",
+    "en": "opacity"
+   },
+   "min": 0,
+   "max": 1,
+   "step": 0.05,
+   "unit": "",
+   "def": 1
+  }
+ },
+ "effects": [],
+ "kinds": [
+  {
+   "kind": "photo",
+   "match": ".photo",
+   "label": {
+    "ru": "фото",
+    "en": "photo"
+   },
+   "edit": "caption",
+   "image": "pic",
+   "blends": "all"
+  },
+  {
+   "kind": "footer",
+   "match": "footer",
+   "label": {
+    "ru": "подвал",
+    "en": "footer"
+   },
+   "bottom": true,
+   "fullw": true,
+   "reveal": false,
+   "dev": false,
+   "hide": false,
+   "single": true
+  },
+  {
+   "kind": "note",
+   "match": ".note",
+   "label": {
+    "ru": "записка",
+    "en": "note"
+   },
+   "overlap": true,
+   "align": true,
+   "list": true
+  }
+ ],
+ "blocks": [
+  {
+   "id": "note",
+   "kind": "note",
+   "label": {
+    "ru": "записка",
+    "en": "note"
+   },
+   "width": 400,
+   "html": "<section class=\"note reveal\"><p>Текст.</p></section>"
+  },
+  {
+   "id": "photo",
+   "kind": "photo",
+   "label": {
+    "ru": "фото",
+    "en": "photo"
+   },
+   "width": 320,
+   "pick": "pic",
+   "html": "<figure class=\"photo reveal\"><img src=\"img/{img}\" alt=\"\"><figcaption>подпись</figcaption></figure>"
+  }
+ ],
+ "new_page_block": "note"
+}

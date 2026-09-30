@@ -10,6 +10,7 @@ HERE = Path(__file__).resolve().parent
 ROOT = HERE.parent
 FIREFOX = os.environ.get('FIREFOX', shutil.which('firefox') or '/usr/bin/firefox')
 OUT = HERE / 'out'
+FIXTURES = {'t20-theme': 'fixture-paper'}       # харнессы с другой фикстурой; остальные — --fixture (fixture-forest)
 
 
 def decode(s):
@@ -46,11 +47,11 @@ def main():
     tests = a.tests or sorted(p.stem for p in (HERE / 'harness').glob('t*.html'))
     OUT.mkdir(exist_ok=True)
     fails = 0; tmp = None; srv = None
-    def start():
+    def start(fixture=None):
         nonlocal tmp, srv
         stop()
         tmp = Path(tempfile.mkdtemp(prefix='afisha-site-'))                 # каждому харнессу — свежая копия фикстуры
-        shutil.copytree(HERE / a.fixture, tmp, dirs_exist_ok=True)
+        shutil.copytree(HERE / (fixture or a.fixture), tmp, dirs_exist_ok=True)
         srv = subprocess.Popen([sys.executable, str(ROOT / 'afisha.py'), 'serve', str(tmp), '--port', str(a.port), '--no-browser', '--tests'],
                                stdout=open(OUT / 'server.log', 'a'), stderr=subprocess.STDOUT)
         if not wait_server(a.port): print('сервер не поднялся, см. tests/out/server.log'); sys.exit(2)
@@ -64,10 +65,10 @@ def main():
     try:
         subprocess.run(['pkill', '-x', 'firefox'], capture_output=True)
         for t in tests:
-            start(); log = OUT / f'{t}.log'
+            start(FIXTURES.get(t)); log = OUT / f'{t}.log'
             firefox(f'http://127.0.0.1:{a.port}/_editor/tests/{t}.html', log)
             lines = [decode(m.group(1)) for m in re.finditer(r'console\.log: "\[T\] (.*?)"\n', log.read_text(encoding='utf-8', errors='replace'))]
-            p = sum(l.startswith('PASS') for l in lines); f = sum(l.startswith('FAIL') for l in lines); done = any(l == 'DONE' for l in lines)
+            p = sum(l.startswith('PASS') for l in lines); f = sum(l.startswith(('FAIL', 'ERROR')) for l in lines); done = any(l == 'DONE' for l in lines)
             for l in lines:
                 if l.startswith('FAIL') or l.startswith('ERROR'): print(f'  {t}: {l}')
             if not done: f += 1; print(f'  {t}: нет DONE (таймаут или исключение), см. {log}')

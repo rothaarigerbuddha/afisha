@@ -1,0 +1,33 @@
+/* ── шрифты (локальные, папка fonts/) ─────────────────────────────────
+   Печать: IM Fell English даёт латиницу, Old Standard TT — кириллицу.
+   Терминал: Tiny5 (есть кириллица). Всё — через unicode-range, браузер
+   сам берёт нужный файл по символу. */
+@font-face { font-family: "IM Fell English"; src: url(fonts/IM_Fell_English-normal-latin.woff2) format("woff2"); font-style: normal; font-display: swap; }
+@font-face { font-family: "IM Fell English"; src: url(fonts/IM_Fell_English-italic-latin.woff2) format("woff2"); font-style: italic; font-display: swap; }
+@font-face { font-family: "Old Standard TT"; src: url(fonts/Old_Standard_TT-normal-cyrillic.woff2) format("woff2"); font-style: normal; unicode-range: U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116; font-display: swap; }
+@font-face { font-family: "Old Standard TT"; src: url(fonts/Old_Standard_TT-italic-cyrillic.woff2) format("woff2"); font-style: italic; unicode-range: U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116; font-display: swap; }
+@font-face { font-family: "Old Standard TT"; src: url(fonts/Old_Standard_TT-normal-latin.woff2) format("woff2"); font-style: normal; font-display: swap; }
+@font-face { font-family: "Old Standard TT"; src: url(fonts/Old_Standard_TT-italic-latin.woff2) format("woff2"); font-style: italic; font-display: swap; }
+@font-face { font-family: "Tiny5"; src: url(fonts/Tiny5-normal-cyrillic.woff2) format("woff2"); unicode-range: U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116; font-display: swap; }
+@font-face { font-family: "Tiny5"; src: url(fonts/Tiny5-normal-latin.woff2) format("woff2"); font-display: swap; }
+
+/* ── токены ─────────────────────────────────────────────────────────── */
+:root {
+  --night: #0b1410;   /* глубина леса */
+  --pine:  #1a2d24;   /* ближние сосны, заливка полей */
+  --moss:  #3b5646;   /* второстепенные линии */
+  --fog:   #98aa9f;   /* туман, приглушённый текст */
+  --mist:  #dfe5df;   /* основной текст, обводки */
+  --paper: #e8dfc9;   /* бумага, кромка вырезок */
+  --ink:   #221c17;   /* чернила */
+  --blood: #9b3a2a;   /* единственный акцент */
+
+  --field: rgba(26, 45, 36, .62);   /* заливка полей */
+  --line:  var(--mist);              /* обводка полей */
+  --bg-image: url("img/bg-forest.jpg");   /* ← фон меняется здесь */
+
+  --print: "IM Fell English", "Old Standard TT", Georgia, serif;
+  --term:  "Tiny5", "Courier New", monospace;
+
+  color-scheme: dark;
+:root { --column-max: 900px; }

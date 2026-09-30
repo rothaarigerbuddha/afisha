@@ -3,8 +3,9 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>kit — entropic division</title>
+<title>kit — каталог блоков темы forest</title>
 <link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="theme.css">
 <link rel="stylesheet" href="layout.css">
 <style>
   /* только для каталога */
@@ -67,13 +68,13 @@
     </div>
 
     <div class="demo">
-      <h3>.cutout — вырезка «из газеты» (рваный край запекается: src/cutout → tools/process.sh)</h3>
+      <h3>.cutout — вырезка «из газеты» (рваный край запекается: src/cutout → конвейер afisha)</h3>
       <figure class="cutout ex" style="--tilt: -2deg"><img src="img/milkchan.png" alt=""><figcaption>fig. 1 — подпись</figcaption></figure>
 <pre>&lt;figure class="cutout glitch" style="--x: 0px; --y: 600px; --w: 300px; --tilt: -2deg"&gt;
   &lt;img src="img/имя.png" alt="…"&gt;
   &lt;figcaption&gt;fig. 1 — подпись&lt;/figcaption&gt;
 &lt;/figure&gt;
-новая вырезка: файл в src/cutout/, строка в tools/cutouts.txt, ./tools/process.sh
+новая вырезка: загрузить через редактор (тип «вырезка»), параметры — _afisha/cutouts.txt
 --w = ширина файла (колонка width в cutouts.txt), поле бумаги и seed разрыва — там же
 класс .fade добавляет растворение книзу</pre>
     </div>
@@ -125,7 +126,7 @@
       <strong>Колонка</strong> (телефон, узкие окна): блоки идут в потоке в порядке <code>--m</code> (меньше — выше), ширины по содержимому.
       <code>hide-m</code> прячет блок в колонке, <code>hide-d</code> — на афише. Между режимами афиша уменьшается ступенями <code>zoom</code>
       (.92 / .85 / .78) — смешивание призраков при этом работает (проверено в Firefox).<br>
-      Ширина афиши и превью телефона — в редакторе, кнопка «холст»: они пишутся в <code>tools/site.json</code>, из него сервер собирает
+      Ширина афиши и превью телефона — в редакторе, кнопка «холст»: они пишутся в <code>_afisha/site.json</code>, из него сервер собирает
       <code>layout.css</code> (пороги окна). Правила раскладки — в <code>style.css</code>, <code>layout.css</code> только переключает их.</p>
 <pre>&lt;section class="field hide-m" style="--x: 320px; --y: 140px; --w: 520px; --m: 3"&gt;только на афише&lt;/section&gt;
 &lt;p class="scrawl note hide-d" style="--m: 1"&gt;только в колонке (позиция не нужна)&lt;/p&gt;

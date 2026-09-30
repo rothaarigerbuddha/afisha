@@ -1,0 +1,954 @@
+{
+ "afisha": 1,
+ "name": "forest",
+ "label": {
+  "ru": "лес",
+  "en": "forest"
+ },
+ "colors": [
+  {
+   "id": "night",
+   "value": "#0b1410",
+   "label": {
+    "ru": "ночь — фон, глубина",
+    "en": "night — background"
+   }
+  },
+  {
+   "id": "pine",
+   "value": "#1a2d24",
+   "label": {
+    "ru": "сосны — заливка полей",
+    "en": "pine — field fill"
+   }
+  },
+  {
+   "id": "moss",
+   "value": "#3b5646",
+   "label": {
+    "ru": "мох — второстепенные линии",
+    "en": "moss — secondary lines"
+   }
+  },
+  {
+   "id": "fog",
+   "value": "#98aa9f",
+   "label": {
+    "ru": "туман — приглушённый текст",
+    "en": "fog — muted text"
+   }
+  },
+  {
+   "id": "mist",
+   "value": "#dfe5df",
+   "label": {
+    "ru": "мгла — основной текст, обводки",
+    "en": "mist — main text, outlines"
+   }
+  },
+  {
+   "id": "paper",
+   "value": "#e8dfc9",
+   "label": {
+    "ru": "бумага — кромка вырезок",
+    "en": "paper — cutout edge"
+   }
+  },
+  {
+   "id": "ink",
+   "value": "#221c17",
+   "label": {
+    "ru": "чернила",
+    "en": "ink"
+   }
+  },
+  {
+   "id": "blood",
+   "value": "#9b3a2a",
+   "label": {
+    "ru": "кровь — единственный акцент",
+    "en": "blood — the only accent"
+   }
+  }
+ ],
+ "vars": {
+  "field": "rgba(26, 45, 36, .62)",
+  "line": "var(--mist)",
+  "column-max": "900px"
+ },
+ "fonts": {
+  "faces": [
+   {
+    "family": "IM Fell English",
+    "file": "fonts/IM_Fell_English-normal-latin.woff2",
+    "style": "normal"
+   },
+   {
+    "family": "IM Fell English",
+    "file": "fonts/IM_Fell_English-italic-latin.woff2",
+    "style": "italic"
+   },
+   {
+    "family": "Old Standard TT",
+    "file": "fonts/Old_Standard_TT-normal-cyrillic.woff2",
+    "style": "normal",
+    "range": "U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116"
+   },
+   {
+    "family": "Old Standard TT",
+    "file": "fonts/Old_Standard_TT-italic-cyrillic.woff2",
+    "style": "italic",
+    "range": "U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116"
+   },
+   {
+    "family": "Old Standard TT",
+    "file": "fonts/Old_Standard_TT-normal-latin.woff2",
+    "style": "normal"
+   },
+   {
+    "family": "Old Standard TT",
+    "file": "fonts/Old_Standard_TT-italic-latin.woff2",
+    "style": "italic"
+   },
+   {
+    "family": "Tiny5",
+    "file": "fonts/Tiny5-normal-cyrillic.woff2",
+    "range": "U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116"
+   },
+   {
+    "family": "Tiny5",
+    "file": "fonts/Tiny5-normal-latin.woff2"
+   }
+  ],
+  "stacks": {
+   "print": "\"IM Fell English\", \"Old Standard TT\", Georgia, serif",
+   "term": "\"Tiny5\", \"Courier New\", monospace"
+  },
+  "labels": {
+   "print": {
+    "ru": "печать (текст)",
+    "en": "print (body)"
+   },
+   "term": {
+    "ru": "терминал (заголовки, служебное)",
+    "en": "terminal (headings, meta)"
+   }
+  }
+ },
+ "background": {
+  "active": "forest"
+ },
+ "color_scheme": "dark",
+ "screen": [
+  {
+   "id": "grain",
+   "sel": ".grain",
+   "label": {
+    "ru": "зерно",
+    "en": "grain"
+   },
+   "on": true
+  },
+  {
+   "id": "scanlines",
+   "sel": ".scanlines",
+   "label": {
+    "ru": "строчная развёртка",
+    "en": "scanlines"
+   },
+   "on": true
+  },
+  {
+   "id": "tracking",
+   "sel": ".tracking",
+   "label": {
+    "ru": "сбой трекинга",
+    "en": "tracking glitch"
+   },
+   "on": true
+  },
+  {
+   "id": "vignette",
+   "sel": ".vignette",
+   "label": {
+    "ru": "виньетка",
+    "en": "vignette"
+   },
+   "on": true
+  }
+ ],
+ "edit": {
+  "silence": [
+   ".reveal",
+   ".ticker span",
+   ".blink"
+  ],
+  "css": ".ticker span{padding-left:0!important}"
+ },
+ "cursors": {
+  "paper": "#e8dfc9",
+  "ink": "#221c17",
+  "cursor": {
+   "hot": [
+    7,
+    7
+   ],
+   "rows": [
+    "......oo........",
+    "......o#o.......",
+    "......o#o.......",
+    "......o#o.......",
+    "......o#o.......",
+    "oooooo.#.oooooo.",
+    "o#####...#####o.",
+    "oooooo.#.oooooo.",
+    "......o#o.......",
+    "......o#o.......",
+    "......o#o.......",
+    "......o#o.......",
+    "......oo........",
+    "................",
+    "................",
+    "................"
+   ]
+  },
+  "hand": {
+   "hot": [
+    5,
+    1
+   ],
+   "rows": [
+    ".....oo.........",
+    "....o##o........",
+    "....o##ooo......",
+    "....o##o##oo....",
+    "....o##o##o#o...",
+    "oo..o##o##o##o..",
+    "o#o.o#######o#o.",
+    "o##o########o#o.",
+    "o#############o.",
+    ".o###########o..",
+    ".o###########o..",
+    "..o#########o...",
+    "..o#########o...",
+    "...o#######o....",
+    "...o#######o....",
+    "...ooooooooo...."
+   ]
+  }
+ },
+ "images": {
+  "bg": {
+   "label": {
+    "ru": "фон (jpg)",
+    "en": "background (jpg)"
+   },
+   "match": "^bg-",
+   "upload": true,
+   "mode": "dither",
+   "width": 1600,
+   "colors": 48,
+   "modulate": "95,70,100",
+   "brightness_contrast": "-5x-15",
+   "quality": 82
+  },
+  "pic": {
+   "label": {
+    "ru": "фото в рамке",
+    "en": "framed photo"
+   },
+   "match": "\\.(jpg|jpeg|webp)$",
+   "upload": true,
+   "mode": "dither",
+   "width": 1400,
+   "colors": 48,
+   "modulate": "95,75,100",
+   "quality": 84
+  },
+  "ghost": {
+   "label": {
+    "ru": "призрак (тёмный кадр)",
+    "en": "ghost (dark frame)"
+   },
+   "match": "^ghost-",
+   "upload": true,
+   "mode": "level",
+   "width": 520,
+   "level": "12%,100%",
+   "quality": 82
+  },
+  "stamp": {
+   "label": {
+    "ru": "штамп / гифка",
+    "en": "stamp / gif"
+   },
+   "match": "\\.(gif|png)$",
+   "upload": true,
+   "gifsearch": true,
+   "mode": "ordered",
+   "max": 160,
+   "dither": "o4x4,4"
+  },
+  "cutout": {
+   "label": {
+    "ru": "вырезка (с однотонного фона)",
+    "en": "cutout (from flat background)"
+   },
+   "match": "\\.png$",
+   "upload": true,
+   "crop": true,
+   "paper": "#e8dfc9",
+   "tint": "#d9b26a",
+   "tint_pct": 12,
+   "edge": "rgb(255,255,204)",
+   "dither": "o8x8,6",
+   "colors": 64,
+   "desaturate": "100,80,100",
+   "level": "5%,95%"
+  }
+ },
+ "text": {
+  "palette": [
+   "paper",
+   "mist",
+   "fog",
+   "blood"
+  ],
+  "keep_span": [
+   "blink",
+   "counter"
+  ]
+ },
+ "blends": {
+  "all": [
+   {
+    "v": "normal",
+    "label": {
+     "ru": "обычное",
+     "en": "normal"
+    }
+   },
+   {
+    "v": "screen",
+    "label": {
+     "ru": "screen — растворить тёмное",
+     "en": "screen — dissolve dark"
+    }
+   },
+   {
+    "v": "multiply",
+    "label": {
+     "ru": "multiply — вжечь в фон",
+     "en": "multiply — burn in"
+    }
+   },
+   {
+    "v": "overlay",
+    "label": {
+     "ru": "overlay — проявка",
+     "en": "overlay"
+    }
+   },
+   {
+    "v": "soft-light",
+    "label": {
+     "ru": "soft-light — мягкая проявка",
+     "en": "soft light"
+    }
+   },
+   {
+    "v": "luminosity",
+    "label": {
+     "ru": "luminosity — в тон фона",
+     "en": "luminosity"
+    }
+   },
+   {
+    "v": "difference",
+    "label": {
+     "ru": "difference — негатив",
+     "en": "difference — negative"
+    }
+   }
+  ],
+  "soft": [
+   "normal",
+   "overlay",
+   "soft-light"
+  ]
+ },
+ "dev": {
+  "op": {
+   "label": {
+    "ru": "прозрачность",
+    "en": "opacity"
+   },
+   "min": 0,
+   "max": 1,
+   "step": 0.05,
+   "unit": "",
+   "def": 1
+  },
+  "gray": {
+   "label": {
+    "ru": "обесцветить",
+    "en": "desaturate"
+   },
+   "min": 0,
+   "max": 1,
+   "step": 0.05,
+   "unit": "",
+   "def": 0
+  },
+  "sepia": {
+   "label": {
+    "ru": "сепия",
+    "en": "sepia"
+   },
+   "min": 0,
+   "max": 1,
+   "step": 0.05,
+   "unit": "",
+   "def": 0
+  },
+  "hue": {
+   "label": {
+    "ru": "сдвиг тона, °",
+    "en": "hue shift, °"
+   },
+   "min": 0,
+   "max": 360,
+   "step": 5,
+   "unit": "deg",
+   "def": 0
+  },
+  "con": {
+   "label": {
+    "ru": "контраст",
+    "en": "contrast"
+   },
+   "min": 0.5,
+   "max": 2,
+   "step": 0.05,
+   "unit": "",
+   "def": 1
+  },
+  "blur": {
+   "label": {
+    "ru": "размытие, px",
+    "en": "blur, px"
+   },
+   "min": 0,
+   "max": 6,
+   "step": 0.5,
+   "unit": "px",
+   "def": 0
+  }
+ },
+ "effects": [
+  {
+   "cls": "fx-stretch",
+   "label": {
+    "ru": "stretch — растяжение",
+    "en": "stretch"
+   },
+   "kinds": [
+    "pic",
+    "cutout",
+    "stamp"
+   ]
+  },
+  {
+   "cls": "fx-channel",
+   "label": {
+    "ru": "channel — смена каналов",
+    "en": "channel mixer"
+   },
+   "kinds": [
+    "pic",
+    "cutout",
+    "stamp",
+    "ghost"
+   ]
+  },
+  {
+   "cls": "fx-crt",
+   "label": {
+    "ru": "crt — расщепление",
+    "en": "crt split"
+   },
+   "kinds": [
+    "pic",
+    "cutout",
+    "stamp",
+    "ghost"
+   ]
+  },
+  {
+   "cls": "fx-dither",
+   "label": {
+    "ru": "dither — сетка",
+    "en": "dither grid"
+   },
+   "kinds": [
+    "pic"
+   ],
+   "where": "frame"
+  },
+  {
+   "cls": "glitch",
+   "label": {
+    "ru": "glitch при наведении",
+    "en": "glitch on hover"
+   },
+   "kinds": [
+    "pic"
+   ],
+   "where": "frame"
+  },
+  {
+   "cls": "glitch",
+   "label": {
+    "ru": "glitch при наведении",
+    "en": "glitch on hover"
+   },
+   "kinds": [
+    "cutout",
+    "stamp"
+   ]
+  },
+  {
+   "cls": "fade",
+   "label": {
+    "ru": "растворение книзу",
+    "en": "fade out downwards"
+   },
+   "kinds": [
+    "cutout"
+   ]
+  },
+  {
+   "cls": "fx-float",
+   "label": {
+    "ru": "покачивание",
+    "en": "float"
+   },
+   "kinds": [
+    "cutout",
+    "stamp",
+    "ghost"
+   ]
+  },
+  {
+   "cls": "fx-flicker",
+   "label": {
+    "ru": "мерцание",
+    "en": "flicker"
+   },
+   "kinds": [
+    "pic",
+    "cutout",
+    "stamp",
+    "ghost"
+   ]
+  },
+  {
+   "cls": "fx-shake",
+   "label": {
+    "ru": "дрожь (время от времени)",
+    "en": "shake (now and then)"
+   },
+   "kinds": [
+    "pic",
+    "cutout",
+    "stamp",
+    "ghost"
+   ]
+  },
+  {
+   "cls": "fx-glitch",
+   "label": {
+    "ru": "глитч сам по себе",
+    "en": "self glitch"
+   },
+   "kinds": [
+    "pic",
+    "cutout",
+    "stamp",
+    "ghost"
+   ]
+  }
+ ],
+ "layout": {
+  "step": 8,
+  "snap": 6,
+  "gap": 8
+ },
+ "embed": {
+  "var": "--h",
+  "min": 120,
+  "max": 800,
+  "step": 10,
+  "def": 300
+ },
+ "defaults": {
+  "layer": "stage",
+  "edit": "body",
+  "overlap": false,
+  "fullw": false,
+  "pixelw": false,
+  "bottom": false,
+  "tiltable": false,
+  "reveal": true,
+  "dev": true,
+  "hide": true,
+  "shared": true,
+  "blends": "soft",
+  "blend_default": "normal",
+  "flip": false,
+  "align": false,
+  "list": false,
+  "generated": false,
+  "single": false
+ },
+ "kinds": [
+  {
+   "kind": "nav",
+   "match": "[data-nav]",
+   "label": {
+    "ru": "меню страниц",
+    "en": "site nav"
+   },
+   "generated": true,
+   "edit": "none",
+   "shared": false
+  },
+  {
+   "kind": "ghost",
+   "match": ".ghost",
+   "label": {
+    "ru": "призрак",
+    "en": "ghost"
+   },
+   "layer": "ghosts",
+   "edit": "none",
+   "image": "ghost",
+   "reveal": false,
+   "hide": false,
+   "shared": false,
+   "blends": "all",
+   "blend_default": "screen"
+  },
+  {
+   "kind": "pic",
+   "match": ".pic",
+   "label": {
+    "ru": "фото в рамке",
+    "en": "framed photo"
+   },
+   "edit": "caption",
+   "image": "pic",
+   "tiltable": true,
+   "flip": true,
+   "blends": "all",
+   "ar": [
+    "3 / 2",
+    "4 / 3",
+    "1 / 1",
+    "2 / 3",
+    "16 / 9"
+   ]
+  },
+  {
+   "kind": "embed",
+   "match": ".embed",
+   "label": {
+    "ru": "встраивание",
+    "en": "embed"
+   },
+   "edit": "caption",
+   "blends": "all",
+   "embed": true
+  },
+  {
+   "kind": "cutout",
+   "match": ".cutout",
+   "label": {
+    "ru": "вырезка",
+    "en": "cutout"
+   },
+   "edit": "caption",
+   "image": "cutout",
+   "pixelw": true,
+   "tiltable": true,
+   "flip": true,
+   "blends": "all"
+  },
+  {
+   "kind": "scrawl",
+   "match": ".scrawl",
+   "label": {
+    "ru": "свободный текст",
+    "en": "scrawl"
+   },
+   "tiltable": true,
+   "align": true,
+   "fs": {
+    "min": 12,
+    "max": 64
+   },
+   "ls": {
+    "min": 0,
+    "max": 0.4,
+    "step": 0.02
+   },
+   "roles": {
+    "quote": {
+     "fs": 30,
+     "label": {
+      "ru": "цитата",
+      "en": "quote"
+     }
+    },
+    "note": {
+     "fs": 19,
+     "label": {
+      "ru": "заметка",
+      "en": "note"
+     }
+    },
+    "meta": {
+     "fs": 15,
+     "label": {
+      "ru": "служебное",
+      "en": "meta"
+     }
+    }
+   }
+  },
+  {
+   "kind": "stamp",
+   "match": ".stamp",
+   "label": {
+    "ru": "штамп",
+    "en": "stamp"
+   },
+   "edit": "none",
+   "image": "stamp",
+   "pixelw": true,
+   "tiltable": true,
+   "flip": true,
+   "blends": "all"
+  },
+  {
+   "kind": "ticker",
+   "match": ".ticker",
+   "label": {
+    "ru": "бегущая строка",
+    "en": "ticker"
+   },
+   "fullw": true,
+   "edit_sel": "span"
+  },
+  {
+   "kind": "trails",
+   "match": ".trails",
+   "label": {
+    "ru": "оглавление",
+    "en": "trails"
+   }
+  },
+  {
+   "kind": "buttons",
+   "match": ".buttons",
+   "label": {
+    "ru": "кнопки 88×31",
+    "en": "88×31 buttons"
+   }
+  },
+  {
+   "kind": "masthead",
+   "match": ".masthead",
+   "label": {
+    "ru": "слот названия",
+    "en": "masthead"
+   },
+   "fullw": true,
+   "edit": "none",
+   "reveal": false,
+   "dev": false,
+   "single": true
+  },
+  {
+   "kind": "footer",
+   "match": "footer",
+   "label": {
+    "ru": "подвал",
+    "en": "footer"
+   },
+   "bottom": true,
+   "fullw": true,
+   "reveal": false,
+   "dev": false,
+   "hide": false,
+   "single": true
+  },
+  {
+   "kind": "field",
+   "match": ".field",
+   "label": {
+    "ru": "поле с текстом",
+    "en": "text field"
+   },
+   "overlap": true,
+   "align": true,
+   "list": true
+  },
+  {
+   "kind": "block",
+   "match": "*",
+   "label": {
+    "ru": "блок",
+    "en": "block"
+   }
+  }
+ ],
+ "blocks": [
+  {
+   "id": "field",
+   "kind": "field",
+   "label": {
+    "ru": "поле с текстом",
+    "en": "text field"
+   },
+   "width": 520,
+   "html": "<section class=\"field reveal\"><h2>заголовок</h2><p>Текст.</p></section>"
+  },
+  {
+   "id": "term",
+   "kind": "field",
+   "label": {
+    "ru": "окно-терминал с кнопкой",
+    "en": "terminal window"
+   },
+   "width": 373,
+   "html": "<section class=\"field term reveal\"><h2>signal.exe</h2><p>&gt; status: online<span class=\"blink\">_</span></p><a class=\"cta\" href=\"#\">кнопка</a></section>"
+  },
+  {
+   "id": "pic",
+   "kind": "pic",
+   "label": {
+    "ru": "фото в рамке",
+    "en": "framed photo"
+   },
+   "width": 440,
+   "pick": "pic",
+   "html": "<figure class=\"field pic reveal\" style=\"--ar: 3 / 2\"><div class=\"frame glitch\"><img src=\"img/{img}\" alt=\"\"></div><figcaption>fig. — подпись</figcaption></figure>"
+  },
+  {
+   "id": "embed",
+   "kind": "embed",
+   "label": {
+    "ru": "встраивание (iframe)",
+    "en": "embed (iframe)"
+   },
+   "width": 560,
+   "html": "<figure class=\"field embed reveal\" style=\"--h: 300px\"><iframe src=\"about:blank\" loading=\"lazy\" allow=\"fullscreen; encrypted-media\" allowfullscreen sandbox=\"allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox\"></iframe><figcaption>сейчас играет</figcaption></figure>"
+  },
+  {
+   "id": "cutout",
+   "kind": "cutout",
+   "label": {
+    "ru": "вырезка",
+    "en": "cutout"
+   },
+   "width": 300,
+   "pick": "cutout",
+   "html": "<figure class=\"cutout glitch reveal\" style=\"--w: 300px; --tilt: -2deg\"><img src=\"img/{img}\" alt=\"\"><figcaption>fig. — подпись</figcaption></figure>"
+  },
+  {
+   "id": "quote",
+   "kind": "scrawl",
+   "role": "quote",
+   "label": {
+    "ru": "цитата",
+    "en": "quote"
+   },
+   "width": 560,
+   "html": "<blockquote class=\"scrawl quote reveal\" style=\"--tilt: -1.5deg\">Цитата<cite>— источник</cite></blockquote>"
+  },
+  {
+   "id": "note",
+   "kind": "scrawl",
+   "role": "note",
+   "label": {
+    "ru": "заметка на полях",
+    "en": "margin note"
+   },
+   "width": 480,
+   "html": "<p class=\"scrawl note reveal\" style=\"--tilt: 1deg\">Мысль на полях.</p>"
+  },
+  {
+   "id": "meta",
+   "kind": "scrawl",
+   "role": "meta",
+   "label": {
+    "ru": "служебная строка",
+    "en": "meta line"
+   },
+   "width": 360,
+   "html": "<p class=\"scrawl meta reveal\">rec 03:14 · tape 07</p>"
+  },
+  {
+   "id": "stamp",
+   "kind": "stamp",
+   "label": {
+    "ru": "штамп / гифка",
+    "en": "stamp / gif"
+   },
+   "width": 96,
+   "pick": "stamp",
+   "html": "<figure class=\"stamp reveal\" style=\"--w: 96px; --tilt: 4deg\"><img src=\"img/{img}\" alt=\"\"></figure>"
+  },
+  {
+   "id": "ghost",
+   "kind": "ghost",
+   "label": {
+    "ru": "призрак",
+    "en": "ghost"
+   },
+   "pick": "ghost",
+   "html": "<figure class=\"ghost\" style=\"--x: 55%; --y: 10%; --w: 40%; --o: .8\"><img src=\"img/{img}\" alt=\"\"></figure>"
+  },
+  {
+   "id": "ticker",
+   "kind": "ticker",
+   "label": {
+    "ru": "бегущая строка",
+    "en": "ticker"
+   },
+   "html": "<div class=\"ticker reveal\" aria-hidden=\"true\"><span>текст · текст · текст</span></div>"
+  },
+  {
+   "id": "trails",
+   "kind": "trails",
+   "label": {
+    "ru": "оглавление (якоря)",
+    "en": "trails (anchors)"
+   },
+   "width": 276,
+   "html": "<nav class=\"trails reveal\"><ul><li><a href=\"#\">якорь</a></li><li><a href=\"#\">ещё якорь</a></li></ul></nav>"
+  },
+  {
+   "id": "buttons",
+   "kind": "buttons",
+   "label": {
+    "ru": "кнопки 88×31",
+    "en": "88×31 buttons"
+   },
+   "width": 276,
+   "html": "<div class=\"buttons reveal\"><a class=\"b88\" href=\"#\">кнопка</a><a class=\"b88 paper\" href=\"#\">ещё</a></div>"
+  }
+ ],
+ "new_page_block": "field"
+}

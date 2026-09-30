@@ -1,0 +1,51 @@
+<!doctype html><meta charset=utf-8><iframe id=ed src="/_editor/editor.html" style="width:2000px;height:1400px"></iframe>
+<script>
+// тема paper (tests/fixture-paper): редактор ничего не знает о лесе — всё из манифеста
+const log = m => console.log('[T] ' + m), ok = (c, m) => log((c ? 'PASS ' : 'FAIL ') + m), sleep = ms => new Promise(r => setTimeout(r, ms));
+const ed = document.getElementById('ed'); let ran = false;
+ed.addEventListener('load', () => { if (ran) return; ran = true; setTimeout(run, 1500); });
+async function run() {
+  const W = ed.contentWindow, E = W.document, P = () => W.eval('doc'), status = () => E.getElementById('status').textContent;
+  try {
+    const T = W.eval('THEME'); log('status: ' + status());
+    ok(T && T.name === 'paper', 'THEME.name = ' + (T && T.name));
+    ok(!E.getElementById('themebtn').hidden, 'кнопка «тема» видна (не legacy)');
+    const adds = [...E.querySelectorAll('#palette-add [data-add]')].map(b => b.dataset.add);
+    ok(adds.length === 2 && adds.includes('note') && adds.includes('photo'), 'палитра из манифеста: ' + adds.join(','));
+    const note = P().getElementById('n1'), photo = P().getElementById('p1'), foot = P().querySelector('.stage > footer');
+    ok(W.kind(note) === 'note' && W.kind(photo) === 'photo' && W.kind(foot) === 'footer', `kind: ${W.kind(note)} ${W.kind(photo)} ${W.kind(foot)}`);
+    const isTF = W.eval('isTextField'); ok(isTF(note) && !isTF(photo), 'правило 1 только у видов с overlap');
+    W.select(photo); await sleep(50);
+    const h3 = [...E.querySelectorAll('#props h3')].map(h => h.textContent);
+    ok(!h3.includes('эффекты') && !E.querySelector('#props [data-v="tilt"]') && E.querySelector('#props [data-img]'), 'фото: без эффектов и наклона, с выбором картинки: ' + h3.join('|'));
+    ok(E.querySelector('#props .type').textContent === 'фото', 'подпись вида из манифеста: ' + E.querySelector('#props .type').textContent);
+    W.select(note); await sleep(50);
+    ok(E.querySelector('#props [data-align]') && !E.querySelector('#props [data-role]') && !E.querySelector('#props [data-cls="hide-m"]') === false, 'записка: выравнивание есть, роли нет');
+    const sw = [...E.querySelectorAll('#textbar .sw [data-color]')].map(b => b.dataset.color);
+    ok(sw.join(',') === 'sand,sky,' && E.querySelector('#textbar .sw [data-color="sand"]').style.background.replace(/\s/g, '') === 'rgb(233,220,192)', 'цвета textbar из палитры темы: ' + sw.join(','));
+    note.innerHTML = '<p>a <span class="c-sand">b</span> <span class="c-blood">c</span> <span class="blink">d</span></p>'; W.normalize(note);
+    ok(note.querySelector('.c-sand') && !note.querySelector('.c-blood') && !note.querySelector('.blink'), 'normalize: c-sand остаётся, чужие span снимаются: ' + note.innerHTML);
+    const inj = [...P().querySelectorAll('style[data-ed]')].map(s => s.textContent).join('');
+    ok(!/\.grain/.test(inj) && /\.reveal\{animation:none/.test(inj), 'injectStyle без слоёв леса, с silence темы');
+    E.querySelector('#palette-add [data-add="note"]').click(); await sleep(250);
+    const added = [...P().querySelectorAll('.stage > .note')].pop();
+    ok(added && added !== note && W.placement(added).w === 400, 'addBlock из манифеста: ширина ' + (added && W.placement(added).w));
+    ok(W.getComputedStyle(P().body).backgroundColor === 'rgb(233, 220, 192)', 'theme.css работает: фон body ' + W.getComputedStyle(P().body).backgroundColor);
+    // модалка темы: предпросмотр и применение — перечитывается только theme.css
+    W.select(note); const undo0 = W.eval('hist').undo.length;
+    E.getElementById('themebtn').click(); await sleep(100);
+    const inp = E.querySelector('#mbody input[data-color="sand"]'); ok(!!inp && inp.value === '#e9dcc0', 'модалка: цвет sand ' + (inp && inp.value));
+    inp.value = '#ff0000'; inp.dispatchEvent(new W.Event('input', { bubbles: true })); await sleep(30);
+    ok(W.getComputedStyle(P().body).backgroundColor === 'rgb(255, 0, 0)', 'предпросмотр цвета на странице');
+    E.getElementById('th-apply').click(); await sleep(2500); log('status: ' + status());
+    ok(P().documentElement.style.getPropertyValue('--sand') === '' && W.getComputedStyle(P().body).backgroundColor === 'rgb(255, 0, 0)', 'после применения цвет из theme.css (предпросмотр снят)');
+    ok(/theme\.css\?v=/.test(P().querySelector('link[href*="theme.css"]').getAttribute('href')), 'перечитан <link theme.css>');
+    ok(W.eval('hist').undo.length === undo0 && W.eval('sel') === note, 'история и выделение сохранены');
+    const th = await (await fetch('/api/theme')).json();
+    ok(th.theme.colors[0].value === '#ff0000', 'theme.json записан: ' + th.theme.colors[0].value);
+    const css = await (await fetch('/theme.css', { cache: 'no-store' })).text();
+    ok(/--sand: #ff0000;/.test(css) && !/@font-face/.test(css), 'theme.css: новый цвет, без @font-face (faces пуст)');
+  } catch (e) { log('ERROR ' + e + '\n' + e.stack); }
+  log('DONE');
+}
+</script>

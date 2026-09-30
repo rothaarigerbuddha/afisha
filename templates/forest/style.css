@@ -1,6 +1,6 @@
 /* ═══════════════════════════════════════════════════════════════════════
-   entropic division — система. Контент живёт в index.html, здесь — правила.
-   Каталог блоков с примерами: kit.html
+   afisha · тема forest — структура. Токены (цвета, шрифты, фон, экранные слои) — в theme.css,
+   который генерируется из _afisha/theme.json (панель «тема» в редакторе). Каталог блоков: kit.html
 
    ТРИ ПРАВИЛА, которые нельзя нарушать:
    1. Текстовые поля (.field) не перекрываются друг с другом. На афише это проверяет
@@ -22,39 +22,7 @@
    переключают режим; их ставит layout.css (по ширине окна) и .stage.flow (всегда колонка).
    ═══════════════════════════════════════════════════════════════════════ */
 
-/* ── шрифты (локальные, папка fonts/) ─────────────────────────────────
-   Печать: IM Fell English даёт латиницу, Old Standard TT — кириллицу.
-   Терминал: Tiny5 (есть кириллица). Всё — через unicode-range, браузер
-   сам берёт нужный файл по символу. */
-@font-face { font-family: "IM Fell English"; src: url(fonts/IM_Fell_English-normal-latin.woff2) format("woff2"); font-style: normal; font-display: swap; }
-@font-face { font-family: "IM Fell English"; src: url(fonts/IM_Fell_English-italic-latin.woff2) format("woff2"); font-style: italic; font-display: swap; }
-@font-face { font-family: "Old Standard TT"; src: url(fonts/Old_Standard_TT-normal-cyrillic.woff2) format("woff2"); font-style: normal; unicode-range: U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116; font-display: swap; }
-@font-face { font-family: "Old Standard TT"; src: url(fonts/Old_Standard_TT-italic-cyrillic.woff2) format("woff2"); font-style: italic; unicode-range: U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116; font-display: swap; }
-@font-face { font-family: "Old Standard TT"; src: url(fonts/Old_Standard_TT-normal-latin.woff2) format("woff2"); font-style: normal; font-display: swap; }
-@font-face { font-family: "Old Standard TT"; src: url(fonts/Old_Standard_TT-italic-latin.woff2) format("woff2"); font-style: italic; font-display: swap; }
-@font-face { font-family: "Tiny5"; src: url(fonts/Tiny5-normal-cyrillic.woff2) format("woff2"); unicode-range: U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116; font-display: swap; }
-@font-face { font-family: "Tiny5"; src: url(fonts/Tiny5-normal-latin.woff2) format("woff2"); font-display: swap; }
-
-/* ── токены ─────────────────────────────────────────────────────────── */
-:root {
-  --night: #0b1410;   /* глубина леса */
-  --pine:  #1a2d24;   /* ближние сосны, заливка полей */
-  --moss:  #3b5646;   /* второстепенные линии */
-  --fog:   #98aa9f;   /* туман, приглушённый текст */
-  --mist:  #dfe5df;   /* основной текст, обводки */
-  --paper: #e8dfc9;   /* бумага, кромка вырезок */
-  --ink:   #221c17;   /* чернила */
-  --blood: #9b3a2a;   /* единственный акцент */
-
-  --field: rgba(26, 45, 36, .62);   /* заливка полей */
-  --line:  var(--mist);              /* обводка полей */
-  --bg-image: url("img/bg-forest.jpg");   /* ← фон меняется здесь */
-
-  --print: "IM Fell English", "Old Standard TT", Georgia, serif;
-  --term:  "Tiny5", "Courier New", monospace;
-
-  color-scheme: dark;
-}
+/* ── шрифты и токены — в theme.css (генерируется из _afisha/theme.json) ─────────── */
 
 /* ── база ───────────────────────────────────────────────────────────── */
 * { box-sizing: border-box; }
@@ -86,11 +54,11 @@ h1, h2, h3 { text-wrap: balance; }
 }
 .bg::after {
   content: ""; position: absolute; inset: 0;
-  background: linear-gradient(to top, rgba(11,20,16,.55), transparent 60%);
+  background: linear-gradient(to top, color-mix(in srgb, var(--night) 55%, transparent), transparent 60%);
 }
 
 /* ── обёртка страницы (порядок рисования = порядок в DOM) ───────────── */
-:root { --column-max: 900px; }        /* ширина колонки на планшете; --poster задаёт layout.css */
+/* --column-max (ширина колонки на планшете) — в theme.css; --poster задаёт layout.css */
 .page {
   position: relative;
   width: var(--l-page, var(--poster, 1400px)); margin: 0 auto;
@@ -248,8 +216,8 @@ footer {
 .fx-dither::after {
   content: ""; position: absolute; inset: 0; pointer-events: none;
   background-image:
-    linear-gradient(45deg, rgba(11,20,16,.45) 25%, transparent 25% 75%, rgba(11,20,16,.45) 75%),
-    linear-gradient(45deg, rgba(11,20,16,.45) 25%, transparent 25% 75%, rgba(11,20,16,.45) 75%);
+    linear-gradient(45deg, color-mix(in srgb, var(--night) 45%, transparent) 25%, transparent 25% 75%, color-mix(in srgb, var(--night) 45%, transparent) 75%),
+    linear-gradient(45deg, color-mix(in srgb, var(--night) 45%, transparent) 25%, transparent 25% 75%, color-mix(in srgb, var(--night) 45%, transparent) 75%);
   background-size: 2px 2px; background-position: 0 0, 1px 1px;
   mix-blend-mode: overlay; opacity: .6;
 }
@@ -322,11 +290,11 @@ footer {
 .scanlines { z-index: 51; background: repeating-linear-gradient(to bottom, transparent 0 3px, rgba(0,0,0,.09) 3px 4px); }
 .tracking {
   z-index: 52; height: 12vh; inset: auto 0 auto 0;
-  background: linear-gradient(to bottom, transparent, rgba(223,229,223,.07) 45%, rgba(155,58,42,.10) 50%, rgba(223,229,223,.07) 55%, transparent);
+  background: linear-gradient(to bottom, transparent, color-mix(in srgb, var(--mist) 7%, transparent) 45%, color-mix(in srgb, var(--blood) 10%, transparent) 50%, color-mix(in srgb, var(--mist) 7%, transparent) 55%, transparent);
   animation: tracking 11s linear infinite;
 }
 @keyframes tracking { 0%, 80% { top: -20vh; } 100% { top: 110vh; } }
-.vignette { z-index: 53; background: radial-gradient(ellipse at center, transparent 70%, rgba(11,20,16,.45) 100%); }
+.vignette { z-index: 53; background: radial-gradient(ellipse at center, transparent 70%, color-mix(in srgb, var(--night) 45%, transparent) 100%); }
 
 /* ── телефон: колонка уже включена layout.css, здесь только мелочи ──── */
 @media (max-width: 760px) {

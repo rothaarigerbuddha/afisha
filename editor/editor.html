@@ -16,6 +16,7 @@
   <button id="phone" class="toggle">телефон</button>
   <button id="magnet" class="toggle on" title="шаг 8 px и прилипание к соседям; Shift — отключить на время">магнит</button>
   <button id="canvasbtn" title="ширина афиши, телефона и экрана посетителя">холст</button>
+  <button id="themebtn" title="цвета, шрифты, фон, экранные слои, обработка картинок">тема</button>
   <span class="zoom"><button id="zoomout" title="Ctrl+−">−</button><button id="zoom100" title="100% — как видит посетитель (Ctrl+0)">100%</button><button id="zoomin" title="Ctrl+=">+</button><button id="zoomfit" title="вся страница целиком (Ctrl+1)">вписать</button></span>
     <select id="pages" title="страница"></select>
   <button id="newpage" title="новая страница с общими блоками">+ страница</button>
@@ -26,30 +27,17 @@
   <a class="help" href="/kit.html" target="_blank">kit</a>
   <button id="toggleR" class="toggle on" title="свернуть/развернуть правую панель">◨</button>
 </header>
+<div id="hintbox" hidden><span id="hinttext"></span><button id="hintclose" title="закрыть">✕</button></div>
 
 <aside class="palette">
   <h3>добавить блок</h3>
-  <button data-add="field">поле с текстом</button>
-  <button data-add="pic">фото в рамке</button>
-  <button data-add="embed">встраивание (iframe)</button>
-  <button data-add="cutout">вырезка</button>
-  <button data-add="quote">цитата</button>
-  <button data-add="note">заметка на полях</button>
-  <button data-add="meta">служебная строка</button>
-  <button data-add="stamp">штамп / гифка</button>
-  <button data-add="ghost">призрак</button>
+  <div id="palette-add"></div>
 
   <h3>фон</h3>
   <select id="bg"></select>
 
   <h3>загрузить картинку</h3>
-  <select id="uptype">
-    <option value="pic">фото в рамке</option>
-    <option value="cutout">вырезка (с однотонного фона)</option>
-    <option value="ghost">призрак (тёмный кадр)</option>
-    <option value="stamp">штамп / гифка</option>
-    <option value="bg">фон (jpg)</option>
-  </select>
+  <select id="uptype"></select>
   <label class="drop" id="drop">
     <input type="file" id="file" accept="image/*" hidden>
     перетащи файл сюда<br>или нажми
@@ -79,7 +67,7 @@
   <button data-cmd="link" title="ссылка (Ctrl+K)">ссылка</button>
   <button data-cmd="unlink" title="убрать ссылку">✕</button>
   <button data-cmd="list" title="список (только в полях)">• список</button>
-  <span class="sw"><button data-color="paper" title="бумага"></button><button data-color="mist" title="туман"></button><button data-color="fog" title="мгла"></button><button data-color="blood" title="кровь"></button><button data-color="" title="без цвета">∅</button></span>
+  <span class="sw"></span>
   <form id="linkform" hidden><input type="text" id="linkurl" placeholder="https://… или #якорь"><button type="submit">ок</button></form>
 </div>
 <div id="modal" hidden><div class="box">
@@ -90,6 +78,7 @@
   <p class="hint">Выбери блок на странице.</p>
 </aside>
 
+<script src="theme.js"></script>
 <script src="editor.js"></script>
 </body>
 </html>

@@ -12,9 +12,10 @@ HIDDEN_TOP = {'_afisha'}                 # не отдаётся никогда 
 
 
 def state(site):
-    layout.ensure_layout(site)
+    layout.ensure_layout(site); theme.ensure_theme_css(site)
+    th, th_err = theme.client_theme(site)
     return {'ok': True, 'images': [i['name'] for i in images.images_list(site)], 'backgrounds': theme.backgrounds(site), 'background': theme.background(site),
-            'pages': site.pages(), 'settings': site.settings(),
+            'pages': site.pages(), 'settings': site.settings(), 'theme': th, 'theme_error': th_err,
             'magick': {'found': images.MAGICK is not None, 'info': images.MAGICK_INFO, 'hint': '' if images.MAGICK else images.MAGICK_HINT}}
 
 
@@ -81,6 +82,7 @@ def make_handler(site, tests=False):
                 '/api/backups': lambda: pages.backups(site, q),
                 '/api/key': lambda: publish.key_get(site),
                 '/api/settings': lambda: {'ok': True, 'settings': site.settings()},
+                '/api/theme': lambda: {'ok': True, 'theme': theme.client_theme(site)[0], 'error': theme.client_theme(site)[1]},
             }
             if u.path in GET: return self._call(GET[u.path])
             if u.path.startswith('/api/'): return self._json(404, {'error': 'нет такого API'})
@@ -119,6 +121,7 @@ def make_handler(site, tests=False):
                 '/api/key': lambda: publish.key_set(site, body),
                 '/api/push': lambda: publish.push(site, q),
                 '/api/settings': lambda: site.settings_set(body),
+                '/api/theme': lambda: with_state(theme.theme_set(site, json.loads(body))),
             }
             if tests: POST['/api/tlog'] = do_tlog
             if u.path in POST: return self._call(POST[u.path])

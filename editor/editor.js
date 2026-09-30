@@ -21,8 +21,9 @@ let KEEP_SPAN = /^$/;                           // разрешённые span �
 
 /* ── статус и API ───────────────────────────────────────────────────── */
 function say(msg, err) { statusEl.textContent = msg; statusEl.classList.toggle('err', !!err); if (!err) hint(''); }
+function sayk(key, err, vars) { statusEl.dataset.key = key; say(t(key, vars), err); }
 function hint(text) { const hb = $('#hintbox'); if (!text) { hb.hidden = true; return; } $('#hinttext').textContent = text; hb.hidden = false; }
-function fail(r) { say((r && r.error) || 'ошибка', true); hint(r && r.hint); }
+function fail(r) { say((r && r.error) || t('st.error'), true); hint(r && r.hint); }
 $('#hintclose').addEventListener('click', () => hint(''));
 let PAGE = 'index';                    // slug текущей страницы (<slug>.html)
 // все запросы к серверу идут здесь: заголовок X-Editor обязателен для POST (защита от чужих вкладок)
@@ -37,7 +38,7 @@ async function api(path, opts = {}) {
 ifr.addEventListener('load', async () => {
   win = ifr.contentWindow; doc = win.document;
   page = doc.querySelector('.page'); stage = doc.querySelector('.stage'); ghosts = doc.querySelector('.ghosts');
-  if (!stage || !page) return say('в index.html нет .stage / .page', true);
+  if (!stage || !page) return sayk('st.no_stage', true);
   if (!ghosts) { ghosts = doc.createElement('div'); ghosts.className = 'ghosts'; ghosts.setAttribute('aria-hidden', 'true'); page.prepend(ghosts); }
   await loadState(); if (!THEME) return;      // манифест темы нужен раньше стилей правки и первого refresh
   injectStyle();
@@ -50,8 +51,8 @@ ifr.addEventListener('load', async () => {
   if (localStorage.getItem('ed-zoom') === null) zoomFit();   // первый запуск: вся страница на столе
   normalizeOrder();
   refresh(); select(null); updateSingles();
-  if (state.theme_error) fail({ error: state.theme_error, hint: 'пока работает тема шаблона; исправь _afisha/theme.json' });
-  else say('готово' + (THEME.warnings.length ? ' · тема: ' + THEME.warnings[0] : ''));
+  if (state.theme_error) fail({ error: state.theme_error, hint: t('st.theme_stub') });
+  else { sayk('st.ready'); if (THEME.warnings.length) say(t('st.ready') + t('st.theme_warn', { w: THEME.warnings[0] })); }
 });
 const isPhone = () => canvas.classList.contains('phone');
 
@@ -93,7 +94,7 @@ async function loadState() {
     applyCanvas();
     const bg = $('#bg'); bg.innerHTML = state.backgrounds.map(b => `<option value="${b}" ${b === state.background ? 'selected' : ''}>${b}</option>`).join('');
     $('#pages').innerHTML = (state.pages || ['index']).map(pg => `<option value="${pg}" ${pg === PAGE ? 'selected' : ''}>${pg}.html</option>`).join('');
-  } catch (e) { say('сервер недоступен: запусти afisha.py', true); }
+  } catch (e) { sayk('st.server_down', true); }
 }
 // тема из манифеста: константы, палитра, textbar; после правки темы — ещё и перечитать theme.css
 function applyTheme(t) {
@@ -126,8 +127,8 @@ function drawMarks() {
   const ml = page.offsetLeft, mr = doc.documentElement.clientWidth - ml - page.offsetWidth;
   L.hidden = R.hidden = F.hidden = phone;
   L.style.width = ml + 'px'; R.style.width = mr + 'px'; F.style.top = settings.screenh + 'px';
-  F.querySelector('i').textContent = `первый экран · ${settings.screen}×${settings.screenh}`;
-  lab.textContent = phone ? `колонка ${settings.phone} px` : `афиша ${settings.poster} px · поля по ${ml} px`;
+  F.querySelector('i').textContent = t('st.first_screen', { w: settings.screen, h: settings.screenh });
+  lab.textContent = phone ? t('st.column_px', { w: settings.phone }) : t('st.poster_px', { w: settings.poster, m: ml });
 }
 // зум стола: transform на iframe; события внутри него приходят уже в его координатах
 function setZoom(z, anchor) {
@@ -247,7 +248,7 @@ function refresh() {
   fixFooter(); layoutSheet(); drawMarks();
   stage.querySelectorAll('.ed-bad').forEach(n => n.classList.remove('ed-bad'));
   const ov = overlaps(); ov.forEach(el => el.classList.add('ed-bad'));
-  if (ov.length) say('перекрываются текстовые поля: ' + ov.map(blockName).join(', ') + ' — сохранить нельзя', true);
+  if (ov.length) sayk('st.overlap', true, { names: ov.map(blockName).join(', ') });
   drawSel();
 }
 function fixFooter() {              // подвал ниже всего: его --y (margin-top) задаёт высоту холста
@@ -260,8 +261,8 @@ function fixFooter() {              // подвал ниже всего: его 
 function snap() { return { s: stage.innerHTML, g: ghosts.innerHTML }; }
 function push() { hist.undo.push(snap()); if (hist.undo.length > 50) hist.undo.shift(); hist.redo.length = 0; }
 function restore(x) { stage.innerHTML = x.s; ghosts.innerHTML = x.g; select(null); refresh(); }
-function undo() { if (!hist.undo.length) return; hist.redo.push(snap()); restore(hist.undo.pop()); say('отменено'); }
-function redo() { if (!hist.redo.length) return; hist.undo.push(snap()); restore(hist.redo.pop()); say('повторено'); }
+function undo() { if (!hist.undo.length) return; hist.redo.push(snap()); restore(hist.undo.pop()); sayk('st.undone'); }
+function redo() { if (!hist.redo.length) return; hist.undo.push(snap()); restore(hist.redo.pop()); sayk('st.redone'); }
 
 /* ── выделение и панель свойств ─────────────────────────────────────── */
 function select(el) {
@@ -278,63 +279,63 @@ function drawSel() {                // рамка рисуется отдель�
   selbox.hidden = false;
 }
 function renderProps() {
-  if (!sel) { propsEl.innerHTML = '<p class="hint">Выбери блок на странице.</p>'; return; }
+  if (!sel) { propsEl.innerHTML = `<p class="hint">${t('props.choose')}</p>`; return; }
   const k = kind(sel), sp = spec(k), rows = [];
   const H = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
   const num = (v) => parseFloat(v) || 0;
   const cssv = n => sel.style.getPropertyValue(n).trim();
-  const fxChecks = () => { const fx = fxFor(k); return fx.length ? `<div class="checks"><h3>эффекты</h3>${fx.map(f => chk(f.where === 'frame' ? sel.querySelector('.frame') : sel, f.cls, H(L(f.label)), f.where)).join('')}</div>` : ''; };
+  const fxChecks = () => { const fx = fxFor(k); return fx.length ? `<div class="checks"><h3>${t('props.effects')}</h3>${fx.map(f => chk(f.where === 'frame' ? sel.querySelector('.frame') : sel, f.cls, H(L(f.label)), f.where)).join('')}</div>` : ''; };
   rows.push(`<p class="type">${H(L(sp.label) || k)}</p>`);
 
   if (sp.layer === 'ghosts') {
     const g = { x: num(cssv('--x')) || (cssv('--rx') ? 100 - num(cssv('--rx')) - num(cssv('--w') || '40') : 55), y: num(cssv('--y')), w: num(cssv('--w') || '40'), o: num(cssv('--o') || '.8') };
-    rows.push(range('x', 'слева, %', g.x, -30, 100, 1), range('y', 'сверху, %', g.y, -10, 100, 1), range('w', 'ширина, %', g.w, 10, 80, 1), range('o', 'прозрачность', g.o, .1, 1, .05));
+    rows.push(range('x', t('props.left_pct'), g.x, -30, 100, 1), range('y', t('props.top_pct'), g.y, -10, 100, 1), range('w', t('props.width_pct'), g.w, 10, 80, 1), range('o', t('props.opacity'), g.o, .1, 1, .05));
     if (sp.image) rows.push(imgSelect(sel.querySelector('img'), imgRe(sp.image)));
     rows.push(fxChecks());
   } else {
     const p = placement(sel);
     if (!sp.bottom) {
-      const pos = sp.fullw ? '' : `<input type="number" data-p="x" value="${Math.round(p.x)}" title="x"> <input type="number" data-p="y" value="${Math.round(p.y)}" title="y"> <input type="number" data-p="w" min="40" value="${Math.round(p.w)}" title="ширина">`;
-      rows.push(`<div class="row"><label>x · y · ширина</label><div class="pair">${pos || `<input type="number" data-p="y" value="${Math.round(p.y)}" title="y"> <span class="val">во всю ширину</span>`}</div></div>`);
-      rows.push(`<div class="actions"><button data-act="layer-up" title="позже в DOM = поверх">слой выше</button><button data-act="layer-down">слой ниже</button></div>`);
+      const pos = sp.fullw ? '' : `<input type="number" data-p="x" value="${Math.round(p.x)}" title="x"> <input type="number" data-p="y" value="${Math.round(p.y)}" title="y"> <input type="number" data-p="w" min="40" value="${Math.round(p.w)}" title="${t('props.width')}">`;
+      rows.push(`<div class="row"><label>${t('props.xyw')}</label><div class="pair">${pos || `<input type="number" data-p="y" value="${Math.round(p.y)}" title="y"> <span class="val">${t('props.fullw')}</span>`}</div></div>`);
+      rows.push(`<div class="actions"><button data-act="layer-up" title="${t('props.layer_up_t')}">${t('props.layer_up')}</button><button data-act="layer-down">${t('props.layer_down')}</button></div>`);
     }
-    if (sp.tiltable) rows.push(range('tilt', 'наклон, °', num(cssv('--tilt')), -8, 8, .5));
+    if (sp.tiltable) rows.push(range('tilt', t('props.tilt'), num(cssv('--tilt')), -8, 8, .5));
     if (sp.ar) {
       const ar = cssv('--ar') || sp.ar[0];
-      rows.push(`<div class="row"><label>пропорции</label><select data-ar>${sp.ar.map(a => `<option ${a === ar ? 'selected' : ''}>${H(a)}</option>`).join('')}</select></div>`);
+      rows.push(`<div class="row"><label>${t('props.ratio')}</label><select data-ar>${sp.ar.map(a => `<option ${a === ar ? 'selected' : ''}>${H(a)}</option>`).join('')}</select></div>`);
     }
     rows.push(fxChecks());
     if (sp.embed) {
       const fr = sel.querySelector('iframe'), E = THEME.embed;
-      rows.push(`<div class="row"><label>код embed или ссылка</label><textarea data-embed rows="3" placeholder="вставь &lt;iframe …&gt; или https://…">${H(fr ? fr.getAttribute('src') || '' : '')}</textarea></div>`, range('h', 'высота, px', num(cssv(E.var)) || E.def, E.min, E.max, E.step));
+      rows.push(`<div class="row"><label>${t('props.embed')}</label><textarea data-embed rows="3" placeholder="${H(t('props.embed_ph'))}">${H(fr ? fr.getAttribute('src') || '' : '')}</textarea></div>`, range('h', t('props.height_px'), num(cssv(E.var)) || E.def, E.min, E.max, E.step));
     }
     if (sp.image) rows.push(imgSelect(sel.querySelector('img'), imgRe(sp.image)));
-    if (sp.image && THEME.images[sp.image] && THEME.images[sp.image].crop) rows.push(`<div class="actions"><button data-act="crop">настроить вырезку…</button><button data-act="reroll">другой край (seed+1)</button></div>`);
-    if (sp.align) rows.push(`<div class="row"><label>выравнивание</label><select data-align>${[['', 'слева'], ['center', 'по центру'], ['end', 'справа']].map(([v, l]) => `<option value="${v}" ${v === cssv('--align') ? 'selected' : ''}>${l}</option>`).join('')}</select></div>`);
+    if (sp.image && THEME.images[sp.image] && THEME.images[sp.image].crop) rows.push(`<div class="actions"><button data-act="crop">${t('props.crop')}</button><button data-act="reroll">${t('props.reroll')}</button></div>`);
+    if (sp.align) rows.push(`<div class="row"><label>${t('props.align')}</label><select data-align>${[['', t('props.align_l')], ['center', t('props.align_c')], ['end', t('props.align_r')]].map(([v, l]) => `<option value="${v}" ${v === cssv('--align') ? 'selected' : ''}>${l}</option>`).join('')}</select></div>`);
     if (sp.roles) {
       const roles = Object.keys(sp.roles), cur = roles.find(r => sel.classList.contains(r)), fsd = sp.fs || { min: 12, max: 64 }, lsd = sp.ls || { min: 0, max: .4, step: .02 };
-      rows.push(range('fs', 'размер, px', num(cssv('--fs')) || (cur && sp.roles[cur].fs) || 19, fsd.min, fsd.max, 1), range('ls', 'разрядка, em', num(cssv('--ls')) || 0, lsd.min, lsd.max, lsd.step));
-      rows.push(`<div class="row"><label>роль</label><select data-role>${roles.map(r => `<option value="${r}" ${r === cur ? 'selected' : ''}>${H(L(sp.roles[r].label) || r)}</option>`).join('')}</select></div>`);
+      rows.push(range('fs', t('props.size_px'), num(cssv('--fs')) || (cur && sp.roles[cur].fs) || 19, fsd.min, fsd.max, 1), range('ls', t('props.spacing_em'), num(cssv('--ls')) || 0, lsd.min, lsd.max, lsd.step));
+      rows.push(`<div class="row"><label>${t('props.role')}</label><select data-role>${roles.map(r => `<option value="${r}" ${r === cur ? 'selected' : ''}>${H(L(sp.roles[r].label) || r)}</option>`).join('')}</select></div>`);
     }
-    if (sp.reveal) rows.push(`<div class="checks"><h3>появление</h3>${chk(sel, 'reveal', 'проявляется из тумана')}</div>` + range('delay', 'задержка, с', num(cssv('--delay')), 0, 1.5, .05));
+    if (sp.reveal) rows.push(`<div class="checks"><h3>${t('props.appear')}</h3>${chk(sel, 'reveal', t('props.reveal'))}</div>` + range('delay', t('props.delay_s'), num(cssv('--delay')), 0, 1.5, .05));
   }
   if (sp.layer !== 'ghosts' && sp.hide) {
-    rows.push(`<div class="checks"><h3>колонка (телефон)</h3><label><input type="checkbox" data-cls="hide-m" data-where=""${sel.classList.contains('hide-m') ? ' checked' : ''}> не показывать в колонке</label><label><input type="checkbox" data-cls="hide-d" data-where=""${sel.classList.contains('hide-d') ? ' checked' : ''}> не показывать на афише</label></div>
-      <div class="actions"><button data-act="m-up">↑ раньше в колонке</button><button data-act="m-down">↓ позже</button></div>`);
+    rows.push(`<div class="checks"><h3>${t('props.column')}</h3><label><input type="checkbox" data-cls="hide-m" data-where=""${sel.classList.contains('hide-m') ? ' checked' : ''}> ${t('props.hide_m')}</label><label><input type="checkbox" data-cls="hide-d" data-where=""${sel.classList.contains('hide-d') ? ' checked' : ''}> ${t('props.hide_d')}</label></div>
+      <div class="actions"><button data-act="m-up">${t('props.m_up')}</button><button data-act="m-down">${t('props.m_down')}</button></div>`);
   }
   if (sp.dev) {
     // проявка: режимы наложения (для текста — только мягкие, остальные гасят текст на тёмном фоне)
     const modes = sp.blends === 'all' ? THEME.blends.all : sp.blends === 'none' ? [] : THEME.blends.all.filter(b => THEME.blends.soft.includes(b.v));
     const cur = cssv('--blend') || sp.blend_default;
-    rows.push(`<div class="checks"><h3>проявка</h3></div>`);
-    if (modes.length) rows.push(`<div class="row"><label>наложение</label><select data-blend>${modes.map(b => `<option value="${b.v}" ${b.v === cur ? 'selected' : ''}>${H(L(b.label) || b.v)}</option>`).join('')}</select></div>`);
+    rows.push(`<div class="checks"><h3>${t('props.dev')}</h3></div>`);
+    if (modes.length) rows.push(`<div class="row"><label>${t('props.blend')}</label><select data-blend>${modes.map(b => `<option value="${b.v}" ${b.v === cur ? 'selected' : ''}>${H(L(b.label) || b.v)}</option>`).join('')}</select></div>`);
     for (const [n, d] of Object.entries(THEME.dev)) { if (n === 'op' && sp.layer === 'ghosts') continue; rows.push(range(n, H(L(d.label) || n), cssv('--' + n) ? num(cssv('--' + n)) : d.def, d.min, d.max, d.step)); }
-    rows.push(`<div class="checks"><label><input type="checkbox" data-dev="inv" ${cssv('--inv') === '1' ? 'checked' : ''}> инверсия</label>${sp.flip ? `<label><input type="checkbox" data-dev="flip" ${cssv('--flip') === '-1' ? 'checked' : ''}> зеркально</label>` : ''}</div><div class="actions"><button data-act="devreset">сбросить проявку</button></div>`);
+    rows.push(`<div class="checks"><label><input type="checkbox" data-dev="inv" ${cssv('--inv') === '1' ? 'checked' : ''}> ${t('props.invert')}</label>${sp.flip ? `<label><input type="checkbox" data-dev="flip" ${cssv('--flip') === '-1' ? 'checked' : ''}> ${t('props.flip')}</label>` : ''}</div><div class="actions"><button data-act="devreset">${t('props.devreset')}</button></div>`);
   }
-  if (sp.edit === 'body' && !sp.bottom && !sp.generated) rows.push('<p class="hint">Текст: двойной клик по блоку на странице.</p>');
-  else if (sp.edit === 'caption') rows.push('<p class="hint">Подпись: двойной клик по ней на странице.</p>');
-  if (sp.layer !== 'ghosts' && sp.shared) rows.push(`<div class="checks"><label><input type="checkbox" data-shared ${sel.classList.contains('shared') ? 'checked' : ''}> общий для всех страниц${sel.id ? ` <code>#${sel.id}</code>` : ''}</label></div>`);
-  rows.push(`<div class="actions"><button data-act="dup">дублировать</button><button data-act="del" class="danger">удалить</button></div>`);
+  if (sp.edit === 'body' && !sp.bottom && !sp.generated) rows.push(`<p class="hint">${t('props.text_hint')}</p>`);
+  else if (sp.edit === 'caption') rows.push(`<p class="hint">${t('props.caption_hint')}</p>`);
+  if (sp.layer !== 'ghosts' && sp.shared) rows.push(`<div class="checks"><label><input type="checkbox" data-shared ${sel.classList.contains('shared') ? 'checked' : ''}> ${t('props.shared')}${sel.id ? ` <code>#${sel.id}</code>` : ''}</label></div>`);
+  rows.push(`<div class="actions"><button data-act="dup">${t('props.dup')}</button><button data-act="del" class="danger">${t('props.del')}</button></div>`);
   propsEl.innerHTML = rows.join('');
   bindProps();
 
@@ -343,8 +344,8 @@ function renderProps() {
   function imgSelect(img, re) {
     const cur = img ? img.getAttribute('src').replace(/^img\//, '') : '';
     const list = state.images.filter(n => !re || re.test(n));
-    return `<div class="row"><label>картинка</label><select data-img>${list.map(n => `<option ${n === cur ? 'selected' : ''}>${n}</option>`).join('')}${list.includes(cur) ? '' : `<option selected>${H(cur)}</option>`}</select></div>
-      <div class="row"><label>alt</label><input type="text" data-alt value="${H(img ? img.alt : '')}"></div>`;
+    return `<div class="row"><label>${t('props.image')}</label><select data-img>${list.map(n => `<option ${n === cur ? 'selected' : ''}>${n}</option>`).join('')}${list.includes(cur) ? '' : `<option selected>${H(cur)}</option>`}</select></div>
+      <div class="row"><label>${t('props.alt')}</label><input type="text" data-alt value="${H(img ? img.alt : '')}"></div>`;
   }
 }
 function bindProps() {
@@ -371,8 +372,8 @@ function bindProps() {
   propsEl.querySelectorAll('input[data-dev]').forEach(inp => inp.addEventListener('change', () => { push(); const n = inp.dataset.dev; if (inp.checked) sel.style.setProperty('--' + n, n === 'flip' ? '-1' : '1'); else sel.style.removeProperty('--' + n); updateDev(sel); refresh(); }));
   const em = propsEl.querySelector('[data-embed]'); if (em) em.addEventListener('change', () => {
     const src = embedSrc(em.value.trim());
-    if (!src) return say('не понял код: нужна ссылка или <iframe> с разрешённого сайта (см. embedSrc в editor.js)', true);
-    push(); sel.querySelector('iframe').setAttribute('src', src); em.value = src; say('встроено: ' + src);
+    if (!src) return sayk('st.embed_bad', true);
+    push(); sel.querySelector('iframe').setAttribute('src', src); em.value = src; sayk('st.embedded', false, { src });
   });
   const sh = propsEl.querySelector('[data-shared]'); if (sh) sh.addEventListener('change', () => {
     push(); sel.classList.toggle('shared', sh.checked);
@@ -391,7 +392,7 @@ async function reroll(el) {
   // другой рисунок разрыва: сервер меняет seed в cutouts.txt и пересобирает PNG; картинка
   // перечитывается сбросом src (сервер шлёт no-store), без ?v= — он утёк бы в index.html
   const img = el.querySelector('img'); const name = (img.getAttribute('src') || '').replace(/^img\//, '').replace(/\.png$/, '');
-  say('пересобираю край…');
+  sayk('st.reroll_wait');
   const r = await api('/api/reroll?name=' + encodeURIComponent(name), { method: 'POST' });
   if (r.error) return fail(r);
   const src = img.getAttribute('src'); img.src = ''; img.src = src;
@@ -415,7 +416,7 @@ function updateDev(el) {
   const vars = [...Object.keys(THEME.dev), 'blend', 'inv', 'flip'];
   el.classList.toggle('dev', vars.some(n => el.style.getPropertyValue('--' + n).trim() !== ''));
 }
-function bad(el) { el.classList.add('ed-bad'); setTimeout(() => el.classList.remove('ed-bad'), 500); say('текстовые поля не могут перекрываться', true); }
+function bad(el) { el.classList.add('ed-bad'); setTimeout(() => el.classList.remove('ed-bad'), 500); sayk('st.overlap_bad', true); }
 function swapOrder(a, b) { const ma = numv(a, 'm') ?? 0, mb = numv(b, 'm') ?? 0; a.style.setProperty('--m', mb); b.style.setProperty('--m', ma); }
 
 /* ── холст: выбор, перетаскивание, текст ────────────────────────────── */
@@ -509,7 +510,7 @@ function endEdit() {
   const el = editing; editing = null;
   el.removeAttribute('contenteditable'); normalize(el);
   textbar.hidden = true; linkform.hidden = true;
-  refresh(); say('текст изменён');
+  refresh(); sayk('st.text_changed');
 }
 function placeTextbar() {
   if (!editing) return;
@@ -538,12 +539,12 @@ linkform.addEventListener('submit', e => {
   e.preventDefault(); const url = linkurl.value.trim(); linkform.hidden = true;
   restoreRange();
   if (!url) return;
-  if (!SAFE_URL.test(url) || /^javascript:/i.test(url)) return say('ссылка: только https, mailto, #якорь или относительный путь', true);
+  if (!SAFE_URL.test(url) || /^javascript:/i.test(url)) return sayk('st.link_bad', true);
   if (savedRange && savedRange.collapsed) { const a = doc.createElement('a'); a.href = url; a.textContent = url; savedRange.insertNode(a); }
   else doc.execCommand('createLink', false, url);
 });
 function colorize(c) {                 // цвет — классом палитры на span; пустой c снимает цвет
-  const r = currentRange(); if (!r || r.collapsed) return say('выдели текст, которому нужен цвет');
+  const r = currentRange(); if (!r || r.collapsed) return sayk('st.color_select');
   const root = r.commonAncestorContainer.nodeType === 1 ? r.commonAncestorContainer : r.commonAncestorContainer.parentElement;
   root.querySelectorAll('span[class^="c-"]').forEach(sp => { if (r.intersectsNode(sp)) unwrap(sp); });
   if (c) { const sp = doc.createElement('span'); sp.className = 'c-' + c; sp.appendChild(r.extractContents()); r.insertNode(sp); r.selectNodeContents(sp); }
@@ -601,10 +602,10 @@ function embedSrc(code) {
 }
 // блок из манифеста: type — id кнопки палитры или тип картинки (библиотека и загрузка передают тип)
 function addBlock(type, img) {
-  const b = blockFor(type); if (!b) return say('в теме нет блока «' + type + '»', true);
+  const b = blockFor(type); if (!b) return sayk('st.no_block', true, { id: type });
   const sp = spec(b.kind);
-  if (b.pick && !img) { img = pickImage(b.pick); if (!img) return say('нет подходящей картинки в img/ — загрузи', true); }
-  if (sp.single && blocks().some(el => kind(el) === b.kind)) return say('такой блок на странице уже есть', true);
+  if (b.pick && !img) { img = pickImage(b.pick); if (!img) return sayk('st.no_image', true); }
+  if (sp.single && blocks().some(el => kind(el) === b.kind)) return sayk('st.single_exists', true);
   push();
   const tpl = doc.createElement('template'); tpl.innerHTML = blockHtml(b, img);
   const el = tpl.content.firstElementChild;
@@ -625,10 +626,10 @@ $('#palette-add').addEventListener('click', e => { const b = e.target.closest('[
 
 /* ── фон и загрузка ─────────────────────────────────────────────────── */
 $('#bg').addEventListener('change', async e => {
-  say('обрабатываю фон…');
+  sayk('st.bg_wait');
   const r = await api('/api/bg?name=' + encodeURIComponent(e.target.value), { method: 'POST' });
   if (r.error) return fail(r);
-  state = r.state; if (r.state.theme) THEME.background = r.state.theme.background; doc.documentElement.style.setProperty('--bg-image', `url("img/bg-${e.target.value}.jpg?${Date.now()}")`); say('фон: ' + e.target.value);
+  state = r.state; if (r.state.theme) THEME.background = r.state.theme.background; doc.documentElement.style.setProperty('--bg-image', `url("img/bg-${e.target.value}.jpg?${Date.now()}")`); sayk('st.bg_set', false, { name: e.target.value });
 });
 const drop = $('#drop'), file = $('#file');
 drop.addEventListener('dragover', e => { e.preventDefault(); drop.classList.add('over'); });
@@ -643,7 +644,7 @@ gc.flavor.addEventListener('change', () => { if (gc.q.value.trim()) gc.form.requ
 gc.more.addEventListener('click', () => { gc.offset += gc.size; gifSearch(); });
 async function gifSearch() {
   const q = gc.q.value.trim(); if (!q) return;
-  gc.query = q; gc.more.hidden = true; say(`ищу «${q}»…`);
+  gc.query = q; gc.more.hidden = true; sayk('st.gif_searching', false, { q });
   try {
     const r = await api(`/api/gifsearch?q=${encodeURIComponent(q)}&flavor=${gc.flavor.value}&offset=${gc.offset}&limit=${gc.size}`, { nopage: true });
     if (r.error) return fail(r);
@@ -653,31 +654,31 @@ async function gifSearch() {
     }
     gc.more.hidden = r.items.length < gc.size;
     const total = gc.grid.children.length;
-    say(total ? `показано ${total}` : 'ничего не нашлось');
-  } catch (e) { say('поиск не удался: ' + e.message, true); }
+    total ? sayk('st.gif_shown', false, { n: total }) : sayk('st.gif_none');
+  } catch (e) { sayk('st.gif_fail', true, { e: e.message }); }
 }
 gc.grid.addEventListener('click', async e => {
   const b = e.target.closest('button'); if (!b) return;
-  b.classList.add('busy'); say('скачиваю…');
+  b.classList.add('busy'); sayk('st.gif_dl');
   try {
     const r = await api(`/api/gifsave?checksum=${b.dataset.checksum}&q=${encodeURIComponent(gc.query)}`, { method: 'POST' });
     if (r.error) return fail(r);
-    state = r.state; addBlock('stamp', r.file); say(`готово: img/${r.file}`);
-  } catch (err) { say('не скачалось: ' + err.message, true); }
+    state = r.state; addBlock('stamp', r.file); sayk('st.done_img', false, { f: r.file });
+  } catch (err) { sayk('st.gif_dl_fail', true, { e: err.message }); }
   finally { b.classList.remove('busy'); }
 });
 
 async function upload(f) {
-  const type = $('#uptype').value; say(`загружаю ${f.name} как ${type}…`);
+  const type = $('#uptype').value; sayk('st.uploading', false, { f: f.name, t: type });
   try {
     const r = await api(`/api/upload?type=${type}&name=${encodeURIComponent(f.name)}`, { method: 'POST', body: f });
     if (r.error) return fail(r);
     state = r.state;
     if (type === 'bg') { $('#bg').innerHTML = state.backgrounds.map(b => `<option ${b === r.file.replace(/^bg-|\.jpg$/g, '') ? 'selected' : ''}>${b}</option>`).join(''); doc.documentElement.style.setProperty('--bg-image', `url("img/${r.file}?${Date.now()}")`); }
     else addBlock(type, r.file);
-    say(`готово: img/${r.file}`);
+    sayk('st.done_img', false, { f: r.file });
     if (type === 'cutout') setTimeout(() => cropModal(r.file.replace(/\.png$/, '')), 400);   // сразу подобрать crop и точки
-  } catch (e) { say('загрузка не удалась: ' + e.message, true); }
+  } catch (e) { sayk('st.upload_fail', true, { e: e.message }); }
 }
 
 /* ── модальные окна ─────────────────────────────────────────────────── */
@@ -691,12 +692,12 @@ modal.addEventListener('mousedown', e => { if (e.target === modal) closeModal();
 async function cropModal(name) {
   const d = await api('/api/cutout?name=' + encodeURIComponent(name), { nopage: true });
   if (d.error) return fail(d);
-  openModal('вырезка ' + name, `<div class="crop"><div><canvas id="cropc"></canvas><p class="hint">Тяни рамку за края или углы, внутри — переносит. Клик — точка заливки фона (в углах картинки, там где фон), правый клик по точке — убрать.</p></div>
+  openModal(t('crop.title', { name }), `<div class="crop"><div><canvas id="cropc"></canvas><p class="hint">${t('crop.hint')}</p></div>
     <div class="side">
-      <div class="row"><label>допуск заливки, % <b id="v-fuzz">${d.fuzz}</b></label><input type="range" id="c-fuzz" min="1" max="15" step=".5" value="${d.fuzz}"></div>
-      <div class="row"><label>поле бумаги, px <b id="v-margin">${d.margin}</b></label><input type="range" id="c-margin" min="4" max="24" step="1" value="${d.margin}"></div>
-      <div class="row"><label>ширина файла, px <b id="v-width">${d.width}</b></label><input type="range" id="c-width" min="120" max="480" step="10" value="${d.width}"></div>
-      <div class="row"><label>seed разрыва</label><input type="number" id="c-seed" min="0" value="${d.seed}"> <button id="c-reseed" type="button">другой</button></div>
+      <div class="row"><label>${t('crop.fuzz')} <b id="v-fuzz">${d.fuzz}</b></label><input type="range" id="c-fuzz" min="1" max="15" step=".5" value="${d.fuzz}"></div>
+      <div class="row"><label>${t('crop.margin')} <b id="v-margin">${d.margin}</b></label><input type="range" id="c-margin" min="4" max="24" step="1" value="${d.margin}"></div>
+      <div class="row"><label>${t('crop.width')} <b id="v-width">${d.width}</b></label><input type="range" id="c-width" min="120" max="480" step="10" value="${d.width}"></div>
+      <div class="row"><label>${t('crop.seed')}</label><input type="number" id="c-seed" min="0" value="${d.seed}"> <button id="c-reseed" type="button">${t('crop.other')}</button></div>
       <p class="hint" id="c-info"></p>
       <div class="actions"><button id="c-apply">применить</button><button id="c-cancel">отмена</button></div>
     </div></div>`);
@@ -712,7 +713,7 @@ async function cropModal(name) {
     ctx.drawImage(img, crop.x, crop.y, crop.w, crop.h, crop.x * sc, crop.y * sc, crop.w * sc, crop.h * sc);
     ctx.strokeStyle = '#e8dfc9'; ctx.lineWidth = 1; ctx.strokeRect(crop.x * sc + .5, crop.y * sc + .5, crop.w * sc, crop.h * sc);
     for (const [x, y] of seeds) { ctx.beginPath(); ctx.arc((crop.x + x) * sc, (crop.y + y) * sc, 5, 0, 7); ctx.fillStyle = 'rgba(155,58,42,.9)'; ctx.fill(); ctx.strokeStyle = '#fff'; ctx.stroke(); }
-    $('#c-info').textContent = `crop ${crop.w}×${crop.h} +${crop.x}+${crop.y} · точек: ${seeds.length}`;
+    $('#c-info').textContent = t('crop.info', { w: crop.w, h: crop.h, x: crop.x, y: crop.y, n: seeds.length });
   }
   const pos = e => { const r = cv.getBoundingClientRect(); return { x: (e.clientX - r.left) / sc, y: (e.clientY - r.top) / sc }; };
   let drag = null;
@@ -732,7 +733,7 @@ async function cropModal(name) {
     c.w = Math.max(8, c.w); c.h = Math.max(8, c.h);
     c.x = Math.max(0, Math.min(d.sw - c.w, c.x)); c.y = Math.max(0, Math.min(d.sh - c.h, c.y)); c.w = Math.min(c.w, d.sw - c.x); c.h = Math.min(c.h, d.sh - c.y);
     // точки хранятся относительно crop: при сдвиге рамки пересчитываем, вышедшие за рамку отбрасываем
-    if (!drag.move) { const before = seeds.length; seeds = seeds.map(([x, y]) => [x + drag.c0.x - c.x, y + drag.c0.y - c.y]).filter(([x, y]) => x >= 0 && y >= 0 && x < c.w && y < c.h); if (seeds.length < before) say('точки за рамкой убраны'); }
+    if (!drag.move) { const before = seeds.length; seeds = seeds.map(([x, y]) => [x + drag.c0.x - c.x, y + drag.c0.y - c.y]).filter(([x, y]) => x >= 0 && y >= 0 && x < c.w && y < c.h); if (seeds.length < before) sayk('crop.seeds_trimmed'); }
     Object.assign(crop, c); draw();
   });
   window.addEventListener('mouseup', e => {
@@ -745,37 +746,37 @@ async function cropModal(name) {
   $('#c-reseed').addEventListener('click', () => { $('#c-seed').value = Math.floor(Math.random() * 1e6); });
   $('#c-cancel').addEventListener('click', closeModal);
   $('#c-apply').addEventListener('click', async () => {
-    say('пересобираю вырезку…'); $('#c-apply').disabled = true;
+    sayk('crop.wait'); $('#c-apply').disabled = true;
     const body = { name, crop, seeds, fuzz: +$('#c-fuzz').value, margin: +$('#c-margin').value, width: +$('#c-width').value, seed: +$('#c-seed').value };
     const r = await api('/api/cutout', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body), nopage: true });
     if (r.error) { $('#c-apply').disabled = false; return fail(r); }
     closeModal();
     doc.querySelectorAll(`img[src$="/${name}.png"], img[src="img/${name}.png"]`).forEach(im => { const src = im.getAttribute('src'); im.src = ''; im.src = src; });
     if (sel && kind(sel) === 'cutout') { push(); sel.style.setProperty('--w', body.width + 'px'); }
-    setTimeout(() => { refresh(); renderProps(); }, 300); say('вырезка пересобрана');
+    setTimeout(() => { refresh(); renderProps(); }, 300); sayk('crop.done');
   });
 }
 
 /* ── библиотека картинок ────────────────────────────────────────────── */
 async function libraryModal() {
   const r = await api('/api/library', { nopage: true }); if (r.error) return fail(r);
-  const T_ = t => L((THEME.images[t] || {}).label) || (t === 'none' ? 'без исходника' : t);
-  const ins = it => Object.keys(THEME.images).filter(t => blockFor(t) && (it.type === t || it.type === 'none' && imgRe(t) && imgRe(t).test(it.name))).map(t => `<button data-ins="${t}">→ ${T_(t)}</button>`).join('');
-  openModal('картинки img/', `<div class="lib">${r.items.map(it => `<div class="it" data-name="${it.name}">
+  const T_ = ty => L((THEME.images[ty] || {}).label) || (ty === 'none' ? t('lib.no_source') : ty);
+  const ins = it => Object.keys(THEME.images).filter(ty => blockFor(ty) && (it.type === ty || it.type === 'none' && imgRe(ty) && imgRe(ty).test(it.name))).map(ty => `<button data-ins="${ty}">→ ${T_(ty)}</button>`).join('');
+  openModal(t('lib.title'), `<div class="lib">${r.items.map(it => `<div class="it" data-name="${it.name}">
       <div class="th"><img src="img/${it.name}" alt="" loading="lazy"></div>
-      <div class="nm">${it.name}</div><div>${T_(it.type)} · ${(it.size / 1024).toFixed(0)} КБ</div>
-      <div class="${it.used.length ? 'used' : ''}">${it.used.length ? 'на: ' + it.used.join(', ') : 'не используется'}</div>
-      <div class="acts">${ins(it)}${!it.used.length && !it.active_bg ? `<button class="danger" data-del title="${it.removes.join('\n')}">удалить</button>` : ''}</div>
+      <div class="nm">${it.name}</div><div>${T_(it.type)} · ${(it.size / 1024).toFixed(0)} ${t('lib.kb')}</div>
+      <div class="${it.used.length ? 'used' : ''}">${it.used.length ? t('lib.used', { pages: it.used.join(', ') }) : t('lib.unused')}</div>
+      <div class="acts">${ins(it)}${!it.used.length && !it.active_bg ? `<button class="danger" data-del title="${it.removes.join('\n')}">${t('lib.del')}</button>` : ''}</div>
     </div>`).join('')}</div>`);
   mbody.addEventListener('click', async e => {
     const b = e.target.closest('button'); if (!b) return; const name = b.closest('.it').dataset.name;
     if (b.dataset.ins) { closeModal(); addBlock(b.dataset.ins, name); return; }
     if ('del' in b.dataset) {
       const it = r.items.find(i => i.name === name);
-      if (!confirm('Удалить навсегда:\n' + it.removes.join('\n'))) return;
+      if (!confirm(t('lib.confirm', { list: it.removes.join('\n') }))) return;
       const x = await api('/api/delete?name=' + encodeURIComponent(name), { method: 'POST', nopage: true });
       if (x.error) return fail(x);
-      state = x.state; say('удалено: ' + x.removed.join(', ')); libraryModal();
+      state = x.state; sayk('lib.deleted', false, { list: x.removed.join(', ') }); libraryModal();
     }
   });
 }
@@ -795,14 +796,14 @@ async function save() {
   endEdit();
   if (isPhone()) { $('#phone').click(); await new Promise(r => setTimeout(r, 150)); }   // наложения проверяются на афише
   const ov = overlaps();
-  if (ov.length) return say('не сохранено: перекрываются текстовые поля ' + ov.map(blockName).join(', '), true);
-  say('сохраняю…');
+  if (ov.length) return sayk('save.overlap', true, { names: ov.map(blockName).join(', ') });
+  sayk('save.saving');
   try {
     const r = await api('/api/save', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ stage: clean(stage), ghosts: clean(ghosts) }) });
     if (r.error) return fail(r);
     const n = await syncShared();
-    say(`сохранено (${new Date().toLocaleTimeString()})` + (n ? `, общие блоки → ${n} стр.` : ''));
-  } catch (e) { say('сервер недоступен: запусти afisha.py', true); }
+    statusEl.dataset.key = 'save.saved'; say(t('save.saved', { time: new Date().toLocaleTimeString() }) + (n ? t('save.shared', { n }) : ''));
+  } catch (e) { sayk('st.server_down', true); }
 }
 // общие блоки (.shared[id]) копируются на остальные страницы: innerHTML и классы (кроме hide-m/hide-d —
 // это раскладка страницы); --x/--y/--w/--m у каждой страницы свои. Нет на странице — вставляется
@@ -840,42 +841,45 @@ async function syncShared() {
 
 /* ── страницы ───────────────────────────────────────────────────────── */
 function gotoPage(slug) {
-  if (hist.undo.length && !confirm('Есть несохранённые правки. Перейти без сохранения?')) { $('#pages').value = PAGE; return; }
+  if (hist.undo.length && !confirm(t('pages.unsaved_goto'))) { $('#pages').value = PAGE; return; }
   PAGE = slug; hist.undo.length = 0; hist.redo.length = 0; sel = null; editing = null; textbar.hidden = true;
   ifr.src = '/' + slug + '.html';
 }
 $('#pages').addEventListener('change', e => gotoPage(e.target.value));
 $('#newpage').addEventListener('click', async () => {
-  const name = prompt('Имя страницы (латиница, цифры, дефис), например shrine-tapes:'); if (!name) return;
+  const name = prompt(t('pages.prompt')); if (!name) return;
   const slug = name.toLowerCase().replace(/[^a-z0-9-]+/g, '-').replace(/^-+|-+$/g, '');
-  if (!slug || slug === 'editor' || slug === 'kit') return say('плохое имя', true);
+  if (!slug || slug === 'editor' || slug === 'kit') return sayk('pages.bad', true);
   // шаблон = index.html: остаются общие блоки и одно пустое поле; призраки копируются
   const html = await (await fetch('/index.html', { cache: 'no-store' })).text();
   const d = new DOMParser().parseFromString(html, 'text/html'), st = d.querySelector('main.stage');
   [...st.children].forEach(el => { if (!el.classList.contains('shared')) el.remove(); });
   st.querySelectorAll('a[href^="#"]').forEach(a => a.setAttribute('href', 'index.html' + a.getAttribute('href')));
-  const note = d.createElement('section'); note.className = 'field reveal'; note.innerHTML = `<h2>${slug}</h2><p>Текст.</p>`;
+  // первый блок новой страницы — из манифеста (new_page_block); заголовок = имя страницы
+  const nb = blockFor(THEME.new_page_block) || THEME.blocks[0];
+  const tpl = d.createElement('template'); tpl.innerHTML = nb ? blockHtml(nb, '') : '<section class="field reveal"><h2></h2><p></p></section>';
+  const note = tpl.content.firstElementChild; const h = note.querySelector('h1,h2,h3'); if (h) h.textContent = slug;
   const maxM = [...st.children].reduce((m, el) => Math.max(m, parseFloat(el.style.getPropertyValue('--m')) || 0), 0);
-  note.style.cssText = `--x: 320px; --y: 140px; --w: 520px; --m: ${maxM + 1}`;
-  const f = st.querySelector(':scope > footer'); f ? f.before(note) : st.appendChild(note);
+  note.style.cssText = `--x: 320px; --y: 140px; --w: ${(nb && nb.width) || 520}px; --m: ${maxM + 1}`;
+  const f = [...st.children].find(isBottom); f ? f.before(note) : st.appendChild(note);
   d.title = slug;
   const out = '<!doctype html>\n' + d.documentElement.outerHTML + '\n';
   const r = await api(`/api/page?page=${slug}`, { method: 'POST', body: out, nopage: true });
   if (r.error) return fail(r);
   state = r.state; $('#pages').innerHTML = state.pages.map(pg => `<option value="${pg}">${pg}.html</option>`).join('');
-  $('#pages').value = slug; gotoPage(slug); say('страница создана: ' + slug + '.html');
+  $('#pages').value = slug; gotoPage(slug); sayk('pages.created', false, { slug });
 });
 
 /* ── бэкапы ─────────────────────────────────────────────────────────── */
 $('#backups').addEventListener('click', async () => {
   const r = await api('/api/backups'); if (r.error) return fail(r);
-  openModal(`бэкапы ${PAGE}.html`, r.items.length ? `<table class="bk">${r.items.map(i => `<tr><td>${i.time}</td><td>${(i.size / 1024).toFixed(1)} КБ</td><td><button data-restore="${i.file}">восстановить</button></td></tr>`).join('')}</table>` : '<p class="hint">пока нет — бэкап создаётся при каждом сохранении</p>');
+  openModal(t('bk.title', { page: PAGE }), r.items.length ? `<table class="bk">${r.items.map(i => `<tr><td>${i.time}</td><td>${(i.size / 1024).toFixed(1)} ${t('lib.kb')}</td><td><button data-restore="${i.file}">${t('bk.restore')}</button></td></tr>`).join('')}</table>` : `<p class="hint">${t('bk.none')}</p>`);
   mbody.addEventListener('click', async e => {
     const b = e.target.closest('[data-restore]'); if (!b) return;
-    if (!confirm('Заменить текущую страницу этой версией? Текущая уйдёт в бэкап.')) return;
+    if (!confirm(t('bk.confirm'))) return;
     const x = await api('/api/restore?file=' + encodeURIComponent(b.dataset.restore), { method: 'POST' });
     if (x.error) return fail(x);
-    closeModal(); hist.undo.length = 0; ifr.src = '/' + PAGE + '.html'; say('восстановлено');
+    closeModal(); hist.undo.length = 0; ifr.src = '/' + PAGE + '.html'; sayk('bk.restored');
   });
 });
 
@@ -883,16 +887,16 @@ $('#backups').addEventListener('click', async () => {
 $('#push').addEventListener('click', async () => {
   const k = await api('/api/key', { nopage: true });
   const dry = await api('/api/push?dry=1', { method: 'POST', nopage: true }); if (dry.error) return fail(dry);
-  openModal('залить на Neocities', `<p class="hint">Уйдёт (только это, без src/ и _afisha/): ${dry.files.length} файлов.</p><pre class="files">${dry.files.join('\n')}</pre>
-    <div class="row"><label>ключ API ${k.has ? '(сохранён в _afisha/neocities.key)' : '— нет; взять на neocities.org/settings → API'}</label><form id="keyform"><input type="password" id="keyval" placeholder="${k.has ? 'оставь пустым, чтобы не менять' : 'вставь ключ'}"><button type="submit">сохранить ключ</button></form></div>
-    <div class="actions"><button id="dopush" ${k.has ? '' : 'disabled'}>залить сейчас</button></div><pre id="pushlog"></pre>`);
-  $('#keyform').addEventListener('submit', async e => { e.preventDefault(); const v = $('#keyval').value.trim(); if (!v) return; const x = await api('/api/key', { method: 'POST', body: v, nopage: true }); if (x.error) return fail(x); $('#dopush').disabled = false; $('#keyval').value = ''; say('ключ сохранён'); });
+  openModal(t('push.title'), `<p class="hint">${t('push.files', { n: dry.files.length })}</p><pre class="files">${dry.files.join('\n')}</pre>
+    <div class="row"><label>${t('push.key')} ${k.has ? t('push.key_has') : t('push.key_none')}</label><form id="keyform"><input type="password" id="keyval" placeholder="${k.has ? t('push.key_keep') : t('push.key_paste')}"><button type="submit">${t('push.key_save')}</button></form></div>
+    <div class="actions"><button id="dopush" ${k.has ? '' : 'disabled'}>${t('push.now')}</button></div><pre id="pushlog"></pre>`);
+  $('#keyform').addEventListener('submit', async e => { e.preventDefault(); const v = $('#keyval').value.trim(); if (!v) return; const x = await api('/api/key', { method: 'POST', body: v, nopage: true }); if (x.error) return fail(x); $('#dopush').disabled = false; $('#keyval').value = ''; sayk('push.key_saved'); });
   $('#dopush').addEventListener('click', async () => {
-    if (hist.undo.length && !confirm('Есть несохранённые правки — залить то, что на диске?')) return;
-    $('#dopush').disabled = true; $('#pushlog').textContent = 'заливаю…';
+    if (hist.undo.length && !confirm(t('push.unsaved'))) return;
+    $('#dopush').disabled = true; $('#pushlog').textContent = t('push.pushing');
     const x = await api('/api/push', { method: 'POST', nopage: true });
-    $('#pushlog').textContent = x.error ? 'ошибка: ' + x.error : `залито ${x.uploaded.length}: ${x.uploaded.join(', ') || '—'}\nбез изменений: ${x.skipped.length}`;
-    $('#dopush').disabled = false; say(x.error ? x.error : 'залито', !!x.error);
+    $('#pushlog').textContent = x.error ? t('push.error', { e: x.error }) : t('push.result', { n: x.uploaded.length, list: x.uploaded.join(', ') || '—', skipped: x.skipped.length });
+    $('#dopush').disabled = false; x.error ? fail(x) : sayk('push.done');
   });
 });
 
@@ -918,13 +922,12 @@ function scaleLayout(st, k) {
   }
 }
 $('#canvasbtn').addEventListener('click', () => {
-  openModal('холст', `<p class="hint">Афиша — фиксированная ширина в пикселях; в окнах уже она уменьшается ступенями zoom, а ниже ${Math.ceil(settings.poster * .78) + 16} px становится колонкой.
-    Числа пишутся в <code>_afisha/site.json</code>, из них собирается <code>layout.css</code>.</p>
-    <div class="row"><label>ширина афиши, px</label><input type="number" id="s-poster" min="800" max="2400" step="10" value="${settings.poster}"></div>
-    <div class="row"><label>ширина превью телефона, px</label><input type="number" id="s-phone" min="320" max="520" step="10" value="${settings.phone}"></div>
-    <div class="row"><label>экран посетителя (только для вида в редакторе), px</label><div class="pair"><input type="number" id="s-screen" min="1000" max="3840" step="10" value="${settings.screen}"> × <input type="number" id="s-screenh" min="500" max="2160" step="10" value="${settings.screenh}"></div></div>
-    <div class="checks"><label><input type="checkbox" id="s-scale" checked> пересчитать положение блоков на всех страницах (x, y, ширина × новая/старая; все страницы будут сохранены)</label></div>
-    <div class="actions"><button id="s-apply">применить</button></div>`);
+  openModal(t('canvas.title'), `<p class="hint">${t('canvas.hint', { px: Math.ceil(settings.poster * .78) + 16 })}</p>
+    <div class="row"><label>${t('canvas.poster')}</label><input type="number" id="s-poster" min="800" max="2400" step="10" value="${settings.poster}"></div>
+    <div class="row"><label>${t('canvas.phone')}</label><input type="number" id="s-phone" min="320" max="520" step="10" value="${settings.phone}"></div>
+    <div class="row"><label>${t('canvas.screen')}</label><div class="pair"><input type="number" id="s-screen" min="1000" max="3840" step="10" value="${settings.screen}"> × <input type="number" id="s-screenh" min="500" max="2160" step="10" value="${settings.screenh}"></div></div>
+    <div class="checks"><label><input type="checkbox" id="s-scale" checked> ${t('canvas.scale')}</label></div>
+    <div class="actions"><button id="s-apply">${t('apply')}</button></div>`);
   $('#s-apply').addEventListener('click', async () => {
     const body = { poster: +$('#s-poster').value, phone: +$('#s-phone').value, screen: +$('#s-screen').value, screenh: +$('#s-screenh').value }, rescale = $('#s-scale').checked;
     $('#s-apply').disabled = true;
@@ -945,7 +948,7 @@ $('#canvasbtn').addEventListener('click', () => {
       hist.undo.length = 0; hist.redo.length = 0;
     }
     settings = r.new; applyCanvas(); closeModal();
-    if (!rescale || k === 1) say(`холст: афиша ${settings.poster}, телефон ${settings.phone}, экран ${settings.screen}×${settings.screenh}`); else say(`холст ${settings.poster} px, блоки пересчитаны ×${k.toFixed(3)}`);
+    if (!rescale || k === 1) sayk('canvas.done', false, { p: settings.poster, ph: settings.phone, w: settings.screen, h: settings.screenh }); else sayk('canvas.scaled', false, { p: settings.poster, k: k.toFixed(3) });
     ifr.src = '/' + PAGE + '.html';          // новый layout.css
   });
 });
@@ -979,20 +982,20 @@ function reloadImages() {                        // пересобранные �
   doc.documentElement.style.setProperty('--bg-image', `url("img/bg-${THEME.background.active}.jpg?${Date.now()}")`);
 }
 function themeModal() {
-  if (THEME.legacy) return say('у этого сайта нет _afisha/theme.json: тема читается из style.css', true);
+  if (THEME.legacy) return sayk('theme.legacy', true);
   const H = x => String(x).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
   const T = THEME;
-  const fontOpts = cur => { const fam = firstFamily(cur); const opt = f => `<option value="${H(f)}" ${f === fam ? 'selected' : ''}>${H(f)}</option>`; return `<optgroup label="из fonts/">${T.fonts.local.map(opt).join('')}</optgroup><optgroup label="системные">${T.fonts.system.map(opt).join('')}</optgroup>`; };
+  const fontOpts = cur => { const fam = firstFamily(cur); const opt = f => `<option value="${H(f)}" ${f === fam ? 'selected' : ''}>${H(f)}</option>`; return `<optgroup label="${t('theme.local')}">${T.fonts.local.map(opt).join('')}</optgroup><optgroup label="${t('theme.system')}">${T.fonts.system.map(opt).join('')}</optgroup>`; };
   const imgRows = Object.entries(T.images).filter(([, p]) => 'mode' in p);
-  openModal('тема · ' + (L(T.label) || T.name), `<div class="theme">
-    <h3>цвета</h3>${T.colors.map(c => `<div class="row"><label>${H(L(c.label) || c.id)}</label><div class="pair"><input type="color" data-color="${c.id}" value="${toHex(c.value)}"><code>--${c.id}</code></div></div>`).join('')}
-    ${Object.keys(T.fonts.stacks).length ? '<h3>шрифты</h3>' + Object.entries(T.fonts.stacks).map(([k, v]) => `<div class="row"><label>${H(L(T.fonts.labels[k]) || k)}</label><select data-font="${k}" data-stack="${H(v)}">${fontOpts(v)}</select></div>`).join('') : ''}
-    <h3>фон</h3><div class="row"><label>картинка фона</label><select data-bg>${(state.backgrounds || []).map(b => `<option ${b === T.background.active ? 'selected' : ''}>${b}</option>`).join('')}</select></div>
-    ${T.screen.length ? `<h3>экранные слои</h3><div class="checks" style="grid-column:1/-1">${T.screen.map(x => `<label><input type="checkbox" data-layer="${x.id}" ${x.on !== false ? 'checked' : ''}> ${H(L(x.label) || x.id)}</label>`).join('')}</div>` : ''}
-    ${imgRows.length ? '<h3>обработка картинок</h3>' + imgRows.map(([t, p]) => `<div class="row"><label>${H(L(p.label) || t)}</label><div class="pair">${'colors' in p ? `<input type="number" data-icolors="${t}" min="8" max="256" value="${p.colors}" title="цветов дизеринга"> <span class="val">цветов</span>` : ''}<label><input type="checkbox" data-asis="${t}" ${p.mode === 'asis' ? 'checked' : ''}> как есть</label></div></div>`).join('') : ''}
+  openModal(t('theme.title', { name: L(T.label) || T.name }), `<div class="theme">
+    <h3>${t('theme.colors')}</h3>${T.colors.map(c => `<div class="row"><label>${H(L(c.label) || c.id)}</label><div class="pair"><input type="color" data-color="${c.id}" value="${toHex(c.value)}"><code>--${c.id}</code></div></div>`).join('')}
+    ${Object.keys(T.fonts.stacks).length ? `<h3>${t('theme.fonts')}</h3>` + Object.entries(T.fonts.stacks).map(([k, v]) => `<div class="row"><label>${H(L(T.fonts.labels[k]) || k)}</label><select data-font="${k}" data-stack="${H(v)}">${fontOpts(v)}</select></div>`).join('') : ''}
+    <h3>${t('theme.bg')}</h3><div class="row"><label>${t('theme.bg_img')}</label><select data-bg>${(state.backgrounds || []).map(b => `<option ${b === T.background.active ? 'selected' : ''}>${b}</option>`).join('')}</select></div>
+    ${T.screen.length ? `<h3>${t('theme.screen')}</h3><div class="checks" style="grid-column:1/-1">${T.screen.map(x => `<label><input type="checkbox" data-layer="${x.id}" ${x.on !== false ? 'checked' : ''}> ${H(L(x.label) || x.id)}</label>`).join('')}</div>` : ''}
+    ${imgRows.length ? `<h3>${t('theme.images')}</h3>` + imgRows.map(([typ, p]) => `<div class="row"><label>${H(L(p.label) || typ)}</label><div class="pair">${'colors' in p ? `<input type="number" data-icolors="${typ}" min="8" max="256" value="${p.colors}" title="${t('theme.dither_t')}"> <span class="val">${t('theme.colors_n')}</span>` : ''}<label><input type="checkbox" data-asis="${typ}" ${p.mode === 'asis' ? 'checked' : ''}> ${t('theme.asis')}</label></div></div>`).join('') : ''}
     ${T.warnings.length ? `<p class="warn">${T.warnings.map(H).join('<br>')}</p>` : ''}
-    <p class="hint" style="grid-column:1/-1">Цвета видны на странице сразу (предпросмотр); «применить» пишет _afisha/theme.json и пересобирает theme.css. Смена фона или обработки пересобирает картинки.</p>
-    <div class="actions"><button id="th-apply">применить</button><button id="th-cancel">отмена</button></div></div>`);
+    <p class="hint" style="grid-column:1/-1">${t('theme.hint')}</p>
+    <div class="actions"><button id="th-apply">${t('apply')}</button><button id="th-cancel">${t('cancel')}</button></div></div>`);
   mbody.querySelectorAll('input[data-color]').forEach(inp => inp.addEventListener('input', () => doc.documentElement.style.setProperty('--' + inp.dataset.color, inp.value)));
   $('#th-cancel').addEventListener('click', closeModal);
   $('#th-apply').addEventListener('click', async () => {
@@ -1004,15 +1007,15 @@ function themeModal() {
     const stacks = Object.fromEntries([...mbody.querySelectorAll('select[data-font]')].map(x => [x.dataset.font, stackWith(x.value, x.dataset.stack, T.fonts.local)]));
     if (Object.keys(stacks).length) patch.fonts = { stacks };
     mbody.querySelectorAll('input[data-icolors]').forEach(i => { (patch.images[i.dataset.icolors] ||= {}).colors = +i.value; });
-    mbody.querySelectorAll('input[data-asis]').forEach(i => { const t = i.dataset.asis, cur = T.images[t].mode; (patch.images[t] ||= {}).mode = i.checked ? 'asis' : (cur !== 'asis' ? cur : DEF_MODE[t] || 'dither'); });
-    $('#th-apply').disabled = true; say('применяю тему…');
+    mbody.querySelectorAll('input[data-asis]').forEach(i => { const ty = i.dataset.asis, cur = T.images[ty].mode; (patch.images[ty] ||= {}).mode = i.checked ? 'asis' : (cur !== 'asis' ? cur : DEF_MODE[ty] || 'dither'); });
+    $('#th-apply').disabled = true; sayk('theme.applying');
     const r = await api('/api/theme', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(patch), nopage: true });
     if (r.error) { $('#th-apply').disabled = false; return fail(r); }
     closeModal(); if (r.state) state = r.state; applyTheme(r.theme);
     $('#bg').innerHTML = (state.backgrounds || []).map(b => `<option value="${b}" ${b === THEME.background.active ? 'selected' : ''}>${b}</option>`).join('');
     await reloadThemeCss(); if (r.reprocessed && r.reprocessed.length) reloadImages();
     refresh(); renderProps();
-    say('тема применена' + (r.reprocessed && r.reprocessed.length ? `, пересобрано картинок: ${r.reprocessed.length}` : ''));
+    statusEl.dataset.key = 'theme.applied'; say(t('theme.applied') + (r.reprocessed && r.reprocessed.length ? t('theme.reprocessed', { n: r.reprocessed.length }) : ''));
   });
 }
 $('#themebtn').addEventListener('click', themeModal);

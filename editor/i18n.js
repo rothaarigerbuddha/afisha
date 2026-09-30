@@ -1,0 +1,140 @@
+/* Язык интерфейса редактора: словари ru/en, t(key, vars) для строк из JS, data-i18n* для разметки editor.html,
+   L({ru,en}) для подписей из манифеста темы. Выбор хранится в localStorage ed-lang. Загружается первым. */
+'use strict';
+
+const I18N = {
+ru: {
+  'title': 'afisha — редактор',
+  'bar.toggleL': 'свернуть/развернуть левую панель', 'bar.toggleR': 'свернуть/развернуть правую панель',
+  'bar.save': 'сохранить', 'bar.undo': 'отменить', 'bar.redo': 'повторить', 'bar.phone': 'телефон', 'bar.magnet': 'магнит',
+  'bar.magnet_t': 'шаг 8 px и прилипание к соседям; Shift — отключить на время', 'bar.canvas': 'холст', 'bar.canvas_t': 'ширина афиши, телефона и экрана посетителя',
+  'bar.theme': 'тема', 'bar.theme_t': 'цвета, шрифты, фон, экранные слои, обработка картинок', 'bar.zoom100_t': '100% — как видит посетитель (Ctrl+0)',
+  'bar.fit': 'вписать', 'bar.fit_t': 'вся страница целиком (Ctrl+1)', 'bar.pages_t': 'страница', 'bar.newpage': '+ страница', 'bar.newpage_t': 'новая страница с общими блоками',
+  'bar.library': 'картинки', 'bar.library_t': 'все картинки img/', 'bar.backups': 'бэкапы', 'bar.backups_t': 'версии этой страницы', 'bar.push': 'залить', 'bar.push_t': 'залить на Neocities',
+  'bar.loading': 'загрузка…', 'bar.lang_t': 'язык интерфейса', 'hint.close': 'закрыть',
+  'pal.add': 'добавить блок', 'pal.bg': 'фон', 'pal.upload': 'загрузить картинку', 'pal.drop': 'перетащи файл сюда<br>или нажми',
+  'pal.upload_hint': 'Файл уйдёт в <code>src/</code>, пройдёт обработку и появится на странице новым блоком.',
+  'gif.title': 'найти гифку (GifCities)', 'gif.search': 'искать', 'gif.ph': 'forest, candle, skull…', 'gif.flavor_t': 'как искать',
+  'gif.hybrid': 'по смыслу и словам', 'gif.semantic': 'по смыслу (что нарисовано)', 'gif.lexical': 'по словам (имя файла, страница)', 'gif.more': 'ещё',
+  'gif.hint': 'Архив GeoCities от Internet Archive. Клик по гифке скачивает её в <code>src/stamp/</code> и ставит на страницу.',
+  'pal.hints': 'подсказки',
+  'pal.hints_text': 'Стол: Ctrl+колесо — зум к курсору, Ctrl+0 — 100% (как видит посетитель), Ctrl+1 — вписать, пробел+тянуть или средняя кнопка — двигать. Афиша: тянуть — перемещает (магнит липнет к соседям, Shift отключает), левый/правый край — ширина, стрелки — 1 px (Shift — 8). Слои — в панели справа. Телефон: перетащи блок на другой — поменяются местами. Двойной клик — правка текста (Enter — абзац, Ctrl+I — курсив, Esc — готово). Delete — удалить.',
+  'page.title_t': 'страница',
+  'tb.bold_t': 'жирный (Ctrl+B)', 'tb.italic_t': 'курсив (Ctrl+I)', 'tb.link': 'ссылка', 'tb.link_t': 'ссылка (Ctrl+K)', 'tb.unlink_t': 'убрать ссылку',
+  'tb.list': '• список', 'tb.list_t': 'список (только в полях)', 'tb.link_ph': 'https://… или #якорь', 'tb.ok': 'ок', 'tb.nocolor': 'без цвета',
+  'modal.close': 'закрыть', 'apply': 'применить', 'cancel': 'отмена',
+  'props.choose': 'Выбери блок на странице.', 'props.effects': 'эффекты', 'props.left_pct': 'слева, %', 'props.top_pct': 'сверху, %', 'props.width_pct': 'ширина, %', 'props.opacity': 'прозрачность',
+  'props.xyw': 'x · y · ширина', 'props.x': 'x', 'props.y': 'y', 'props.width': 'ширина', 'props.fullw': 'во всю ширину', 'props.layer_up': 'слой выше', 'props.layer_up_t': 'позже в DOM = поверх', 'props.layer_down': 'слой ниже',
+  'props.tilt': 'наклон, °', 'props.ratio': 'пропорции', 'props.embed': 'код embed или ссылка', 'props.embed_ph': 'вставь <iframe …> или https://…', 'props.height_px': 'высота, px',
+  'props.crop': 'настроить вырезку…', 'props.reroll': 'другой край (seed+1)', 'props.align': 'выравнивание', 'props.align_l': 'слева', 'props.align_c': 'по центру', 'props.align_r': 'справа',
+  'props.size_px': 'размер, px', 'props.spacing_em': 'разрядка, em', 'props.role': 'роль', 'props.appear': 'появление', 'props.reveal': 'проявляется из тумана', 'props.delay_s': 'задержка, с',
+  'props.column': 'колонка (телефон)', 'props.hide_m': 'не показывать в колонке', 'props.hide_d': 'не показывать на афише', 'props.m_up': '↑ раньше в колонке', 'props.m_down': '↓ позже',
+  'props.dev': 'проявка', 'props.blend': 'наложение', 'props.invert': 'инверсия', 'props.flip': 'зеркально', 'props.devreset': 'сбросить проявку',
+  'props.text_hint': 'Текст: двойной клик по блоку на странице.', 'props.caption_hint': 'Подпись: двойной клик по ней на странице.', 'props.shared': 'общий для всех страниц',
+  'props.dup': 'дублировать', 'props.del': 'удалить', 'props.image': 'картинка', 'props.alt': 'alt',
+  'st.error': 'ошибка', 'st.no_stage': 'в index.html нет .stage / .page', 'st.theme_stub': 'пока работает тема шаблона; исправь _afisha/theme.json', 'st.ready': 'готово', 'st.theme_warn': ' · тема: {w}',
+  'st.server_down': 'сервер недоступен: запусти afisha.py', 'st.first_screen': 'первый экран · {w}×{h}', 'st.column_px': 'колонка {w} px', 'st.poster_px': 'афиша {w} px · поля по {m} px',
+  'st.overlap': 'перекрываются текстовые поля: {names} — сохранить нельзя', 'st.undone': 'отменено', 'st.redone': 'повторено',
+  'st.embed_bad': 'не понял код: нужна ссылка или <iframe> с разрешённого сайта (см. embedSrc в editor.js)', 'st.embedded': 'встроено: {src}', 'st.reroll_wait': 'пересобираю край…',
+  'st.overlap_bad': 'текстовые поля не могут перекрываться', 'st.text_changed': 'текст изменён', 'st.link_bad': 'ссылка: только https, mailto, #якорь или относительный путь',
+  'st.color_select': 'выдели текст, которому нужен цвет', 'st.no_block': 'в теме нет блока «{id}»', 'st.no_image': 'нет подходящей картинки в img/ — загрузи', 'st.single_exists': 'такой блок на странице уже есть',
+  'st.bg_wait': 'обрабатываю фон…', 'st.bg_set': 'фон: {name}', 'st.gif_searching': 'ищу «{q}»…', 'st.gif_shown': 'показано {n}', 'st.gif_none': 'ничего не нашлось', 'st.gif_fail': 'поиск не удался: {e}',
+  'st.gif_dl': 'скачиваю…', 'st.done_img': 'готово: img/{f}', 'st.gif_dl_fail': 'не скачалось: {e}', 'st.uploading': 'загружаю {f} как {t}…', 'st.upload_fail': 'загрузка не удалась: {e}',
+  'crop.title': 'вырезка {name}', 'crop.hint': 'Тяни рамку за края или углы, внутри — переносит. Клик — точка заливки фона (в углах картинки, там где фон), правый клик по точке — убрать.',
+  'crop.fuzz': 'допуск заливки, %', 'crop.margin': 'поле бумаги, px', 'crop.width': 'ширина файла, px', 'crop.seed': 'seed разрыва', 'crop.other': 'другой',
+  'crop.info': 'crop {w}×{h} +{x}+{y} · точек: {n}', 'crop.seeds_trimmed': 'точки за рамкой убраны', 'crop.wait': 'пересобираю вырезку…', 'crop.done': 'вырезка пересобрана',
+  'lib.no_source': 'без исходника', 'lib.title': 'картинки img/', 'lib.used': 'на: {pages}', 'lib.unused': 'не используется', 'lib.del': 'удалить', 'lib.confirm': 'Удалить навсегда:\n{list}', 'lib.deleted': 'удалено: {list}', 'lib.kb': 'КБ',
+  'save.overlap': 'не сохранено: перекрываются текстовые поля {names}', 'save.saving': 'сохраняю…', 'save.saved': 'сохранено ({time})', 'save.shared': ', общие блоки → {n} стр.',
+  'pages.unsaved_goto': 'Есть несохранённые правки. Перейти без сохранения?', 'pages.prompt': 'Имя страницы (латиница, цифры, дефис), например shrine-tapes:', 'pages.bad': 'плохое имя', 'pages.created': 'страница создана: {slug}.html',
+  'bk.title': 'бэкапы {page}.html', 'bk.none': 'пока нет — бэкап создаётся при каждом сохранении', 'bk.restore': 'восстановить', 'bk.confirm': 'Заменить текущую страницу этой версией? Текущая уйдёт в бэкап.', 'bk.restored': 'восстановлено',
+  'push.title': 'залить на Neocities', 'push.files': 'Уйдёт (только это, без src/ и _afisha/): {n} файлов.', 'push.key': 'ключ API', 'push.key_has': '(сохранён в _afisha/neocities.key)', 'push.key_none': '— нет; взять на neocities.org/settings → API',
+  'push.key_keep': 'оставь пустым, чтобы не менять', 'push.key_paste': 'вставь ключ', 'push.key_save': 'сохранить ключ', 'push.now': 'залить сейчас', 'push.key_saved': 'ключ сохранён',
+  'push.unsaved': 'Есть несохранённые правки — залить то, что на диске?', 'push.pushing': 'заливаю…', 'push.error': 'ошибка: {e}', 'push.result': 'залито {n}: {list}\nбез изменений: {skipped}', 'push.done': 'залито',
+  'canvas.title': 'холст', 'canvas.hint': 'Афиша — фиксированная ширина в пикселях; в окнах уже она уменьшается ступенями zoom, а ниже {px} px становится колонкой. Числа пишутся в <code>_afisha/site.json</code>, из них собирается <code>layout.css</code>.',
+  'canvas.poster': 'ширина афиши, px', 'canvas.phone': 'ширина превью телефона, px', 'canvas.screen': 'экран посетителя (только для вида в редакторе), px',
+  'canvas.scale': 'пересчитать положение блоков на всех страницах (x, y, ширина × новая/старая; все страницы будут сохранены)',
+  'canvas.done': 'холст: афиша {p}, телефон {ph}, экран {w}×{h}', 'canvas.scaled': 'холст {p} px, блоки пересчитаны ×{k}',
+  'theme.legacy': 'у этого сайта нет _afisha/theme.json: тема читается из style.css', 'theme.local': 'из fonts/', 'theme.system': 'системные', 'theme.title': 'тема · {name}',
+  'theme.colors': 'цвета', 'theme.fonts': 'шрифты', 'theme.bg': 'фон', 'theme.bg_img': 'картинка фона', 'theme.screen': 'экранные слои', 'theme.images': 'обработка картинок',
+  'theme.dither_t': 'цветов дизеринга', 'theme.colors_n': 'цветов', 'theme.asis': 'как есть',
+  'theme.hint': 'Цвета видны на странице сразу (предпросмотр); «применить» пишет _afisha/theme.json и пересобирает theme.css. Смена фона или обработки пересобирает картинки.',
+  'theme.applying': 'применяю тему…', 'theme.applied': 'тема применена', 'theme.reprocessed': ', пересобрано картинок: {n}',
+},
+en: {
+  'title': 'afisha — editor',
+  'bar.toggleL': 'collapse/expand left panel', 'bar.toggleR': 'collapse/expand right panel',
+  'bar.save': 'save', 'bar.undo': 'undo', 'bar.redo': 'redo', 'bar.phone': 'phone', 'bar.magnet': 'magnet',
+  'bar.magnet_t': '8 px step and snapping to neighbours; hold Shift to disable', 'bar.canvas': 'canvas', 'bar.canvas_t': 'poster, phone and visitor screen widths',
+  'bar.theme': 'theme', 'bar.theme_t': 'colours, fonts, background, screen layers, image processing', 'bar.zoom100_t': '100% — as the visitor sees it (Ctrl+0)',
+  'bar.fit': 'fit', 'bar.fit_t': 'whole page (Ctrl+1)', 'bar.pages_t': 'page', 'bar.newpage': '+ page', 'bar.newpage_t': 'new page with the shared blocks',
+  'bar.library': 'images', 'bar.library_t': 'all images in img/', 'bar.backups': 'backups', 'bar.backups_t': 'versions of this page', 'bar.push': 'publish', 'bar.push_t': 'upload to Neocities',
+  'bar.loading': 'loading…', 'bar.lang_t': 'interface language', 'hint.close': 'close',
+  'pal.add': 'add block', 'pal.bg': 'background', 'pal.upload': 'upload image', 'pal.drop': 'drop a file here<br>or click',
+  'pal.upload_hint': 'The file goes to <code>src/</code>, gets processed and appears on the page as a new block.',
+  'gif.title': 'find a gif (GifCities)', 'gif.search': 'search', 'gif.ph': 'forest, candle, skull…', 'gif.flavor_t': 'search mode',
+  'gif.hybrid': 'by meaning and words', 'gif.semantic': 'by meaning (what is drawn)', 'gif.lexical': 'by words (file name, page)', 'gif.more': 'more',
+  'gif.hint': 'GeoCities archive by the Internet Archive. Click a gif to download it into <code>src/stamp/</code> and place it on the page.',
+  'pal.hints': 'hints',
+  'pal.hints_text': 'Desk: Ctrl+wheel — zoom at cursor, Ctrl+0 — 100% (as the visitor sees it), Ctrl+1 — fit, space+drag or middle button — pan. Poster: drag moves (the magnet snaps to neighbours, Shift disables it), left/right edge — width, arrows — 1 px (Shift — 8). Layers — in the right panel. Phone: drop a block onto another to swap them. Double click — edit text (Enter — paragraph, Ctrl+I — italic, Esc — done). Delete — remove.',
+  'page.title_t': 'page',
+  'tb.bold_t': 'bold (Ctrl+B)', 'tb.italic_t': 'italic (Ctrl+I)', 'tb.link': 'link', 'tb.link_t': 'link (Ctrl+K)', 'tb.unlink_t': 'remove link',
+  'tb.list': '• list', 'tb.list_t': 'list (text fields only)', 'tb.link_ph': 'https://… or #anchor', 'tb.ok': 'ok', 'tb.nocolor': 'no colour',
+  'modal.close': 'close', 'apply': 'apply', 'cancel': 'cancel',
+  'props.choose': 'Select a block on the page.', 'props.effects': 'effects', 'props.left_pct': 'left, %', 'props.top_pct': 'top, %', 'props.width_pct': 'width, %', 'props.opacity': 'opacity',
+  'props.xyw': 'x · y · width', 'props.x': 'x', 'props.y': 'y', 'props.width': 'width', 'props.fullw': 'full width', 'props.layer_up': 'layer up', 'props.layer_up_t': 'later in DOM = on top', 'props.layer_down': 'layer down',
+  'props.tilt': 'tilt, °', 'props.ratio': 'aspect ratio', 'props.embed': 'embed code or link', 'props.embed_ph': 'paste <iframe …> or https://…', 'props.height_px': 'height, px',
+  'props.crop': 'adjust cutout…', 'props.reroll': 'another edge (seed+1)', 'props.align': 'alignment', 'props.align_l': 'left', 'props.align_c': 'centre', 'props.align_r': 'right',
+  'props.size_px': 'size, px', 'props.spacing_em': 'letter spacing, em', 'props.role': 'role', 'props.appear': 'appearance', 'props.reveal': 'reveals from the fog', 'props.delay_s': 'delay, s',
+  'props.column': 'column (phone)', 'props.hide_m': 'hide in the column', 'props.hide_d': 'hide on the poster', 'props.m_up': '↑ earlier in the column', 'props.m_down': '↓ later',
+  'props.dev': 'develop', 'props.blend': 'blend mode', 'props.invert': 'invert', 'props.flip': 'mirror', 'props.devreset': 'reset develop',
+  'props.text_hint': 'Text: double-click the block on the page.', 'props.caption_hint': 'Caption: double-click it on the page.', 'props.shared': 'shared across pages',
+  'props.dup': 'duplicate', 'props.del': 'delete', 'props.image': 'image', 'props.alt': 'alt',
+  'st.error': 'error', 'st.no_stage': 'index.html has no .stage / .page', 'st.theme_stub': 'the template theme is in use for now; fix _afisha/theme.json', 'st.ready': 'ready', 'st.theme_warn': ' · theme: {w}',
+  'st.server_down': 'server unreachable: run afisha.py', 'st.first_screen': 'first screen · {w}×{h}', 'st.column_px': 'column {w} px', 'st.poster_px': 'poster {w} px · margins {m} px',
+  'st.overlap': 'text fields overlap: {names} — cannot save', 'st.undone': 'undone', 'st.redone': 'redone',
+  'st.embed_bad': 'could not parse: need a link or an <iframe> from an allowed site (see embedSrc in editor.js)', 'st.embedded': 'embedded: {src}', 'st.reroll_wait': 'rebuilding the edge…',
+  'st.overlap_bad': 'text fields cannot overlap', 'st.text_changed': 'text changed', 'st.link_bad': 'link: only https, mailto, #anchor or a relative path',
+  'st.color_select': 'select the text to colour', 'st.no_block': 'the theme has no block “{id}”', 'st.no_image': 'no suitable image in img/ — upload one', 'st.single_exists': 'this block is already on the page',
+  'st.bg_wait': 'processing background…', 'st.bg_set': 'background: {name}', 'st.gif_searching': 'searching “{q}”…', 'st.gif_shown': 'shown {n}', 'st.gif_none': 'nothing found', 'st.gif_fail': 'search failed: {e}',
+  'st.gif_dl': 'downloading…', 'st.done_img': 'done: img/{f}', 'st.gif_dl_fail': 'download failed: {e}', 'st.uploading': 'uploading {f} as {t}…', 'st.upload_fail': 'upload failed: {e}',
+  'crop.title': 'cutout {name}', 'crop.hint': 'Drag the frame by its edges or corners, inside — moves it. Click — a flood-fill point (in the image corners, where the background is), right-click a point — remove.',
+  'crop.fuzz': 'fill tolerance, %', 'crop.margin': 'paper margin, px', 'crop.width': 'file width, px', 'crop.seed': 'tear seed', 'crop.other': 'another',
+  'crop.info': 'crop {w}×{h} +{x}+{y} · points: {n}', 'crop.seeds_trimmed': 'points outside the frame removed', 'crop.wait': 'rebuilding the cutout…', 'crop.done': 'cutout rebuilt',
+  'lib.no_source': 'no source', 'lib.title': 'images img/', 'lib.used': 'on: {pages}', 'lib.unused': 'unused', 'lib.del': 'delete', 'lib.confirm': 'Delete permanently:\n{list}', 'lib.deleted': 'deleted: {list}', 'lib.kb': 'KB',
+  'save.overlap': 'not saved: text fields overlap {names}', 'save.saving': 'saving…', 'save.saved': 'saved ({time})', 'save.shared': ', shared blocks → {n} pages',
+  'pages.unsaved_goto': 'There are unsaved changes. Leave without saving?', 'pages.prompt': 'Page name (latin letters, digits, hyphen), e.g. shrine-tapes:', 'pages.bad': 'bad name', 'pages.created': 'page created: {slug}.html',
+  'bk.title': 'backups of {page}.html', 'bk.none': 'none yet — a backup is made on every save', 'bk.restore': 'restore', 'bk.confirm': 'Replace the current page with this version? The current one goes to backups.', 'bk.restored': 'restored',
+  'push.title': 'upload to Neocities', 'push.files': 'Will be uploaded (only this, no src/ or _afisha/): {n} files.', 'push.key': 'API key', 'push.key_has': '(stored in _afisha/neocities.key)', 'push.key_none': '— none; get one at neocities.org/settings → API',
+  'push.key_keep': 'leave empty to keep', 'push.key_paste': 'paste the key', 'push.key_save': 'save key', 'push.now': 'upload now', 'push.key_saved': 'key saved',
+  'push.unsaved': 'There are unsaved changes — upload what is on disk?', 'push.pushing': 'uploading…', 'push.error': 'error: {e}', 'push.result': 'uploaded {n}: {list}\nunchanged: {skipped}', 'push.done': 'uploaded',
+  'canvas.title': 'canvas', 'canvas.hint': 'The poster has a fixed width in pixels; in narrower windows it shrinks in zoom steps, and below {px} px it becomes a column. The numbers go to <code>_afisha/site.json</code>, from which <code>layout.css</code> is built.',
+  'canvas.poster': 'poster width, px', 'canvas.phone': 'phone preview width, px', 'canvas.screen': 'visitor screen (editor view only), px',
+  'canvas.scale': 'rescale block positions on all pages (x, y, width × new/old; all pages will be saved)',
+  'canvas.done': 'canvas: poster {p}, phone {ph}, screen {w}×{h}', 'canvas.scaled': 'canvas {p} px, blocks rescaled ×{k}',
+  'theme.legacy': 'this site has no _afisha/theme.json: the theme is read from style.css', 'theme.local': 'from fonts/', 'theme.system': 'system', 'theme.title': 'theme · {name}',
+  'theme.colors': 'colours', 'theme.fonts': 'fonts', 'theme.bg': 'background', 'theme.bg_img': 'background image', 'theme.screen': 'screen layers', 'theme.images': 'image processing',
+  'theme.dither_t': 'dither colours', 'theme.colors_n': 'colours', 'theme.asis': 'as is',
+  'theme.hint': 'Colours preview on the page immediately; “apply” writes _afisha/theme.json and rebuilds theme.css. Changing the background or processing rebuilds the images.',
+  'theme.applying': 'applying theme…', 'theme.applied': 'theme applied', 'theme.reprocessed': ', images rebuilt: {n}',
+},
+};
+let LANG = I18N[localStorage.getItem('ed-lang')] ? localStorage.getItem('ed-lang') : 'ru';   // по умолчанию русский; переключатель в верхней панели
+function t(key, vars) {
+  let s = (I18N[LANG] && I18N[LANG][key]) ?? I18N.ru[key] ?? key;
+  if (vars) for (const [k, v] of Object.entries(vars)) s = s.split('{' + k + '}').join(v);
+  return s;
+}
+function L(o) { return (o && typeof o === 'object') ? (o[LANG] ?? o.ru ?? o.en ?? '') : (o ?? ''); }
+function applyLang() {
+  document.documentElement.lang = LANG; document.title = t('title');
+  document.querySelectorAll('[data-i18n]').forEach(el => { el.textContent = t(el.dataset.i18n); });
+  document.querySelectorAll('[data-i18n-html]').forEach(el => { el.innerHTML = t(el.dataset.i18nHtml); });
+  document.querySelectorAll('[data-i18n-title]').forEach(el => { el.title = t(el.dataset.i18nTitle); });
+  document.querySelectorAll('[data-i18n-placeholder]').forEach(el => { el.placeholder = t(el.dataset.i18nPlaceholder); });
+  const sel = document.getElementById('lang'); if (sel) sel.value = LANG;
+}
+function setLang(l) {
+  if (!I18N[l]) return; LANG = l; localStorage.setItem('ed-lang', l); applyLang();
+  if (typeof THEME !== 'undefined' && THEME) { buildPalette(); if (typeof renderProps === 'function') renderProps(); if (typeof refresh === 'function' && typeof doc !== 'undefined' && doc) refresh(); }
+}
+document.addEventListener('DOMContentLoaded', () => { applyLang(); const sel = document.getElementById('lang'); if (sel) sel.addEventListener('change', () => setLang(sel.value)); });

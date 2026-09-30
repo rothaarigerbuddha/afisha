@@ -4,8 +4,7 @@
 'use strict';
 
 let THEME = null;
-// подпись из манифеста {ru, en}: пока только русский, i18n — следующий шаг (L переопределяется в i18n.js)
-const L = o => (o && typeof o === 'object') ? (o.ru ?? o.en ?? '') : (o ?? '');
+// подписи манифеста {ru, en} выбирает L() из i18n.js
 const KIND_DEFAULTS = { layer: 'stage', edit: 'body', overlap: false, fullw: false, pixelw: false, bottom: false, tiltable: false, reveal: true,
   dev: true, hide: true, shared: true, blends: 'soft', blend_default: 'normal', flip: false, align: false, list: false, generated: false, single: false };
 
@@ -71,7 +70,7 @@ function buildPalette() {
   if ([...up.options].some(o => o.value === cur)) up.value = cur;
   const sw = document.querySelector('#textbar .sw');
   sw.innerHTML = THEME.text.palette.map(id => `<button data-color="${id}" title="${H(L((THEME.colors.find(c => c.id === id) || {}).label) || id)}" style="background:${colorOf(id)}"></button>`).join('') +
-    '<button data-color="" title="без цвета">∅</button>';
+    `<button data-color="" title="${t('tb.nocolor')}">∅</button>`;
   sw.hidden = !THEME.text.palette.length;
   updateSingles();
 }

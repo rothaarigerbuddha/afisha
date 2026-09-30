@@ -1,0 +1,33 @@
+<!doctype html><meta charset=utf-8><iframe id=ed src="/_editor/editor.html" style="width:2000px;height:1400px"></iframe>
+<script>
+// переключение языка интерфейса: data-i18n в разметке, t() в панели свойств, подписи манифеста через L(), ключ статуса
+const log = m => console.log('[T] ' + m), ok = (c, m) => log((c ? 'PASS ' : 'FAIL ') + m), sleep = ms => new Promise(r => setTimeout(r, ms));
+const ed = document.getElementById('ed'); let ran = false;
+ed.addEventListener('load', () => { if (ran) return; ran = true; setTimeout(run, 1500); });
+async function run() {
+  const W = ed.contentWindow, E = W.document, P = () => W.eval('doc'), status = () => E.getElementById('status');
+  try {
+    ok(W.eval('LANG') === 'ru' && E.getElementById('save').textContent === 'сохранить', 'по умолчанию русский: ' + E.getElementById('save').textContent);
+    ok(status().dataset.key === 'st.ready' && status().textContent === 'готово', 'статус несёт ключ: ' + status().dataset.key);
+    const note = P().getElementById('note'); W.select(note); await sleep(30);
+    ok(E.querySelector('#props .type').textContent === 'поле с текстом', 'тип блока по-русски: ' + E.querySelector('#props .type').textContent);
+    const sel = E.getElementById('lang'); sel.value = 'en'; sel.dispatchEvent(new W.Event('change', { bubbles: true })); await sleep(100);
+    ok(E.getElementById('save').textContent === 'save' && E.getElementById('magnet').title.startsWith('8 px step'), `en: save=«${E.getElementById('save').textContent}», magnet title=«${E.getElementById('magnet').title.slice(0, 20)}»`);
+    ok(E.documentElement.lang === 'en' && E.title === 'afisha — editor', 'lang и title документа: ' + E.documentElement.lang + ' / ' + E.title);
+    ok(E.querySelector('#props .type').textContent === 'text field', 'панель свойств перерисована с L(): ' + E.querySelector('#props .type').textContent);
+    ok([...E.querySelectorAll('#props h3')].some(h => h.textContent === 'effects') === false && [...E.querySelectorAll('#props h3')].some(h => h.textContent === 'column (phone)'), 'заголовки панели через t(): ' + [...E.querySelectorAll('#props h3')].map(h => h.textContent).join('|'));
+    ok(E.querySelector('#palette-add [data-add="field"]').textContent === 'text field', 'кнопки палитры из манифеста по-английски: ' + E.querySelector('#palette-add [data-add="field"]').textContent);
+    ok(E.querySelector('[data-i18n="pal.hints_text"]').textContent.startsWith('Desk:'), 'длинная подсказка переведена');
+    ok(E.querySelector('[data-i18n-html="pal.drop"]').innerHTML.includes('<br>'), 'html-подписи через innerHTML');
+    ok(W.localStorage.getItem('ed-lang') === 'en', 'язык запомнен в localStorage');
+    W.undo(); await sleep(30);
+    ok(status().dataset.key === 'st.undone' || status().dataset.key === 'st.ready', 'ключ статуса не зависит от языка: ' + status().dataset.key);
+    W.refresh(); await sleep(30);
+    ok(/poster 1400 px/.test(P().querySelector('.ed-label').textContent), 'подпись полей на листе по-английски: ' + P().querySelector('.ed-label').textContent);
+    sel.value = 'ru'; sel.dispatchEvent(new W.Event('change', { bubbles: true })); await sleep(100);
+    ok(E.getElementById('save').textContent === 'сохранить' && E.querySelector('#props .type').textContent === 'поле с текстом', 'обратно на русский');
+    ok(W.t('st.gif_shown', { n: 7 }) === 'показано 7' && W.t('nope.key') === 'nope.key', 't(): подстановка и запасной ключ');
+  } catch (e) { log('ERROR ' + e + '\n' + e.stack); }
+  log('DONE');
+}
+</script>

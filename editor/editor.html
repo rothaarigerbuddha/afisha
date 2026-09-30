@@ -8,76 +8,78 @@
 </head>
 <body>
 <header class="bar">
-  <button id="toggleL" class="toggle on" title="свернуть/развернуть левую панель">◧</button>
+  <button id="toggleL" class="toggle on" data-i18n-title="bar.toggleL">◧</button>
   <strong>afisha</strong>
-  <button id="save" title="Ctrl+S">сохранить</button>
-  <button id="undo" title="Ctrl+Z">отменить</button>
-  <button id="redo" title="Ctrl+Y">повторить</button>
-  <button id="phone" class="toggle">телефон</button>
-  <button id="magnet" class="toggle on" title="шаг 8 px и прилипание к соседям; Shift — отключить на время">магнит</button>
-  <button id="canvasbtn" title="ширина афиши, телефона и экрана посетителя">холст</button>
-  <button id="themebtn" title="цвета, шрифты, фон, экранные слои, обработка картинок">тема</button>
-  <span class="zoom"><button id="zoomout" title="Ctrl+−">−</button><button id="zoom100" title="100% — как видит посетитель (Ctrl+0)">100%</button><button id="zoomin" title="Ctrl+=">+</button><button id="zoomfit" title="вся страница целиком (Ctrl+1)">вписать</button></span>
-    <select id="pages" title="страница"></select>
-  <button id="newpage" title="новая страница с общими блоками">+ страница</button>
-  <button id="library" title="все картинки img/">картинки</button>
-  <button id="backups" title="версии этой страницы">бэкапы</button>
-  <button id="push" title="залить на Neocities">залить</button>
-  <span id="status" class="status">загрузка…</span>
+  <button id="save" title="Ctrl+S" data-i18n="bar.save">сохранить</button>
+  <button id="undo" title="Ctrl+Z" data-i18n="bar.undo">отменить</button>
+  <button id="redo" title="Ctrl+Y" data-i18n="bar.redo">повторить</button>
+  <button id="phone" class="toggle" data-i18n="bar.phone">телефон</button>
+  <button id="magnet" class="toggle on" data-i18n-title="bar.magnet_t" data-i18n="bar.magnet">магнит</button>
+  <button id="canvasbtn" data-i18n-title="bar.canvas_t" data-i18n="bar.canvas">холст</button>
+  <button id="themebtn" data-i18n-title="bar.theme_t" data-i18n="bar.theme">тема</button>
+  <span class="zoom"><button id="zoomout" title="Ctrl+−">−</button><button id="zoom100" data-i18n-title="bar.zoom100_t">100%</button><button id="zoomin" title="Ctrl+=">+</button><button id="zoomfit" data-i18n-title="bar.fit_t" data-i18n="bar.fit">вписать</button></span>
+    <select id="pages" data-i18n-title="bar.pages_t"></select>
+  <button id="newpage" data-i18n-title="bar.newpage_t" data-i18n="bar.newpage">+ страница</button>
+  <button id="library" data-i18n-title="bar.library_t" data-i18n="bar.library">картинки</button>
+  <button id="backups" data-i18n-title="bar.backups_t" data-i18n="bar.backups">бэкапы</button>
+  <button id="push" data-i18n-title="bar.push_t" data-i18n="bar.push">залить</button>
+  <span id="status" class="status" data-i18n="bar.loading">загрузка…</span>
   <a class="help" href="/kit.html" target="_blank">kit</a>
-  <button id="toggleR" class="toggle on" title="свернуть/развернуть правую панель">◨</button>
+  <select id="lang" data-i18n-title="bar.lang_t"><option value="ru">ru</option><option value="en">en</option></select>
+  <button id="toggleR" class="toggle on" data-i18n-title="bar.toggleR">◨</button>
 </header>
-<div id="hintbox" hidden><span id="hinttext"></span><button id="hintclose" title="закрыть">✕</button></div>
+<div id="hintbox" hidden><span id="hinttext"></span><button id="hintclose" data-i18n-title="hint.close">✕</button></div>
 
 <aside class="palette">
-  <h3>добавить блок</h3>
+  <h3 data-i18n="pal.add">добавить блок</h3>
   <div id="palette-add"></div>
 
-  <h3>фон</h3>
+  <h3 data-i18n="pal.bg">фон</h3>
   <select id="bg"></select>
 
-  <h3>загрузить картинку</h3>
+  <h3 data-i18n="pal.upload">загрузить картинку</h3>
   <select id="uptype"></select>
   <label class="drop" id="drop">
     <input type="file" id="file" accept="image/*" hidden>
-    перетащи файл сюда<br>или нажми
+    <span data-i18n-html="pal.drop">перетащи файл сюда<br>или нажми</span>
   </label>
-  <p class="hint">Файл уйдёт в <code>src/</code>, пройдёт обработку и появится на странице новым блоком.</p>
+  <p class="hint" data-i18n-html="pal.upload_hint">Файл уйдёт в <code>src/</code>, пройдёт обработку и появится на странице новым блоком.</p>
 
   <div id="gifsearch" hidden>
-    <h3>найти гифку (GifCities)</h3>
-    <form id="gcform"><input id="gcq" type="search" placeholder="forest, candle, skull…" autocomplete="off"><button type="submit">искать</button></form>
-    <select id="gcflavor" title="как искать"><option value="hybrid">по смыслу и словам</option><option value="semantic">по смыслу (что нарисовано)</option><option value="lexical">по словам (имя файла, страница)</option></select>
+    <h3 data-i18n="gif.title">найти гифку (GifCities)</h3>
+    <form id="gcform"><input id="gcq" type="search" placeholder="forest, candle, skull…" data-i18n-placeholder="gif.ph" autocomplete="off"><button type="submit" data-i18n="gif.search">искать</button></form>
+    <select id="gcflavor" data-i18n-title="gif.flavor_t"><option value="hybrid" data-i18n="gif.hybrid">по смыслу и словам</option><option value="semantic" data-i18n="gif.semantic">по смыслу (что нарисовано)</option><option value="lexical" data-i18n="gif.lexical">по словам (имя файла, страница)</option></select>
     <div id="gcgrid" class="gcgrid"></div>
-    <button id="gcmore" hidden>ещё</button>
-    <p class="hint">Архив GeoCities от Internet Archive. Клик по гифке скачивает её в <code>src/stamp/</code> и ставит на страницу.</p>
+    <button id="gcmore" hidden data-i18n="gif.more">ещё</button>
+    <p class="hint" data-i18n-html="gif.hint">Архив GeoCities от Internet Archive. Клик по гифке скачивает её в <code>src/stamp/</code> и ставит на страницу.</p>
   </div>
 
-  <h3>подсказки</h3>
-  <p class="hint">Стол: Ctrl+колесо — зум к курсору, Ctrl+0 — 100% (как видит посетитель), Ctrl+1 — вписать, пробел+тянуть или средняя кнопка — двигать. Афиша: тянуть — перемещает (магнит липнет к соседям, Shift отключает), левый/правый край — ширина, стрелки — 1 px (Shift — 8). Слои — в панели справа. Телефон: перетащи блок на другой — поменяются местами. Двойной клик — правка текста (Enter — абзац, Ctrl+I — курсив, Esc — готово). Delete — удалить.</p>
+  <h3 data-i18n="pal.hints">подсказки</h3>
+  <p class="hint" data-i18n="pal.hints_text"></p>
 </aside>
 
 <main class="canvas" id="canvas">
-  <div id="sheet"><iframe id="page" src="/index.html" title="страница"></iframe></div>
+  <div id="sheet"><iframe id="page" src="/index.html" data-i18n-title="page.title_t"></iframe></div>
 </main>
 
 <div id="textbar" hidden>
-  <button data-cmd="bold" title="жирный (Ctrl+B)"><b>B</b></button>
-  <button data-cmd="italic" title="курсив (Ctrl+I)"><i>I</i></button>
-  <button data-cmd="link" title="ссылка (Ctrl+K)">ссылка</button>
-  <button data-cmd="unlink" title="убрать ссылку">✕</button>
-  <button data-cmd="list" title="список (только в полях)">• список</button>
+  <button data-cmd="bold" data-i18n-title="tb.bold_t"><b>B</b></button>
+  <button data-cmd="italic" data-i18n-title="tb.italic_t"><i>I</i></button>
+  <button data-cmd="link" data-i18n-title="tb.link_t" data-i18n="tb.link">ссылка</button>
+  <button data-cmd="unlink" data-i18n-title="tb.unlink_t">✕</button>
+  <button data-cmd="list" data-i18n-title="tb.list_t" data-i18n="tb.list">• список</button>
   <span class="sw"></span>
-  <form id="linkform" hidden><input type="text" id="linkurl" placeholder="https://… или #якорь"><button type="submit">ок</button></form>
+  <form id="linkform" hidden><input type="text" id="linkurl" data-i18n-placeholder="tb.link_ph"><button type="submit" data-i18n="tb.ok">ок</button></form>
 </div>
 <div id="modal" hidden><div class="box">
-  <div class="mhead"><strong id="mtitle"></strong><button id="mclose">закрыть</button></div>
+  <div class="mhead"><strong id="mtitle"></strong><button id="mclose" data-i18n="modal.close">закрыть</button></div>
   <div id="mbody"></div>
 </div></div>
 <aside class="props" id="props">
-  <p class="hint">Выбери блок на странице.</p>
+  <p class="hint" data-i18n="props.choose">Выбери блок на странице.</p>
 </aside>
 
+<script src="i18n.js"></script>
 <script src="theme.js"></script>
 <script src="editor.js"></script>
 </body>

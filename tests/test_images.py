@@ -69,8 +69,8 @@ class Pipeline(unittest.TestCase):
             written = images.process_all(site, active_bg='forest')
             self.assertIn('bg-forest.jpg', written); self.assertIn('ghost-water.jpg', written)
             self.assertEqual(sha(new / 'img' / 'bg-forest.jpg'), sha(FIX / 'src' / 'bg' / 'forest.jpg'), 'как есть = копия')
-            self.assertIn('an-appeal-to-heavan-flag-book.png', written, 'PNG-вырезка без magick копируется')
-            self.assertFalse((new / 'img' / 'milkchan.png').exists(), 'JPG-вырезка без magick не собирается')
+            self.assertIn('pennant.png', written, 'PNG-вырезка без magick копируется')
+            self.assertFalse((new / 'img' / 'figure.png').exists(), 'JPG-вырезка без magick не собирается')
             with self.assertRaises(ApiError) as cm:
                 images.upload(site, {'type': ['cutout'], 'name': ['a.jpg']}, b'\xff\xd8\xff')
             self.assertIn('ImageMagick', str(cm.exception))

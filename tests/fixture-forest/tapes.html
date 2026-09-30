@@ -2,7 +2,7 @@
 <html lang="ru"><head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>tapes</title>
+<title>пример — tapes</title>
 <link rel="stylesheet" href="style.css">
 <link rel="stylesheet" href="theme.css">
 </head>
@@ -21,24 +21,20 @@
     </figure>
   </div>
 
-  <!-- слой 2: сетка. 12 колонок. --c: колонки, --r: ряды (как в CSS grid: от/до).
-       Правило: текстовые поля не делят ряды с другими текстовыми полями.
-       На телефоне сетка становится колонкой в порядке, в котором блоки идут здесь. -->
+  <!-- слой 2: афиша. Блоки стоят по --x/--y/--w (px), слои = порядок в файле; на телефоне — колонка в порядке --m. -->
   <main class="stage">
 
-    <!-- название: пустой слот. Текст, картинка-логотип или ничего — решается позже -->
+    <!-- название: пустой слот. Текст, картинка-логотип или ничего -->
     <header class="masthead shared" id="s-masthead" style="--m: 0; --y: 0px;"></header>
 
     <div class="ticker reveal shared" id="s-ticker" style="--m: 1; --y: 31px;" aria-hidden="true">
-      <span>СИГНАЛ ПРИНЯТ &nbsp;·&nbsp; 03:14 &nbsp;·&nbsp; туман 100% &nbsp;·&nbsp; трекинг сбит &nbsp;·&nbsp; не ходи за огнями &nbsp;·&nbsp; CH 03 &nbsp;·&nbsp; REC ●</span>
+      <span>БЕГУЩАЯ СТРОКА &nbsp;·&nbsp; 00:00 &nbsp;·&nbsp; короткие фразы &nbsp;·&nbsp; через точку &nbsp;·&nbsp; сколько угодно &nbsp;·&nbsp; CH 01 &nbsp;·&nbsp; REC ●</span>
     </div>
 
-    <!-- TODO(human): заголовок и 2–4 абзаца о том, что это за место и что за канал.
-         Единственное место на странице с голосом автора. Ниже, в окне signal,
-         подставь адрес канала вместо https://t.me/CHANNEL -->
+    <!-- главное текстовое поле: заголовок и несколько абзацев -->
     
 
-    <!-- placeholder: цитата. Замени строкой песни / псалма / надписью с флага -->
+    <!-- цитата: одна-две строки курсивом -->
     
 
     
@@ -48,15 +44,15 @@
     <!-- вырезка «из газеты»: любой PNG с альфой из img/, обводка ляжет по силуэту -->
     
 
-    <!-- фото в полях: одно заходит на другое (--r пересекаются, --dx/--dy сдвигают) -->
+    <!-- фото в рамках: одно заходит на другое -->
     
 
     
 
-    <!-- placeholder: мысль на полях -->
+    <!-- заметка на полях -->
     
 
-    <!-- placeholder: служебная надпись как текстура -->
+    <!-- служебная надпись как текстура -->
     
 
     
@@ -67,21 +63,21 @@
         <li><a href="#note">записка</a></li>
         <li><a href="#signal">сигнал</a></li>
         <li><a href="#now">сейчас</a></li>
-        <li><a href="#photos">плёнка</a></li>
+        <li><a href="#photos">фото</a></li>
         <li><a href="#archive">архив</a></li>
       </ul>
     </nav>
 
     <div class="buttons reveal shared" id="s-buttons" style="--delay: .15s; --m: 3; --y: 328px; --x: 0px; --w: 328px;">
-      <a class="b88 red" href="#">APPEAL TO HEAVEN</a>
+      <a class="b88 red" href="#">КНОПКА 88×31</a>
       <a class="b88" href="https://neocities.org">neocities</a>
-      <a class="b88 paper" href="#">no AI art</a>
+      <a class="b88 paper" href="#">ещё кнопка</a>
       <a class="b88" href="#">✶ link me</a>
     </div>
 
     <section class="field reveal" style="--m: 4; --y: 95px; --x: 347px; --w: 1021px;"><h2>tapes</h2><p>Текст.</p></section><footer class="shared" id="s-footer" style="--y: 420px; --m: 5;">
-      <span>посетителей: <span class="counter">000413</span></span>
-      <span>обновлено: 2026-09-30</span>
+      <span>посетителей: <span class="counter">000000</span></span>
+      <span>обновлено: 2026-01-01</span>
       <span>hosted on neocities · сделано руками</span>
     </footer>
 

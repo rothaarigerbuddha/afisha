@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>entropic division</title>
+<title>пример — index</title>
 <link rel="stylesheet" href="style.css">
 <link rel="stylesheet" href="theme.css">
 <link rel="stylesheet" href="layout.css">
@@ -23,86 +23,81 @@
     </figure>
   </div>
 
-  <!-- слой 2: сетка. 12 колонок. --c: колонки, --r: ряды (как в CSS grid: от/до).
-       Правило: текстовые поля не делят ряды с другими текстовыми полями.
-       На телефоне сетка становится колонкой в порядке, в котором блоки идут здесь. -->
+  <!-- слой 2: афиша. Блоки стоят по --x/--y/--w (px), слои = порядок в файле; на телефоне — колонка в порядке --m. -->
   <main class="stage">
 
-    <!-- название: пустой слот. Текст, картинка-логотип или ничего — решается позже -->
+    <!-- название: пустой слот. Текст, картинка-логотип или ничего -->
     <header class="masthead shared" id="s-masthead" style="--m: 0; --y: 0px;"></header>
 
     <div class="ticker reveal shared" id="s-ticker" style="--m: 1; --y: 31px;" aria-hidden="true">
-      <span>СИГНАЛ ПРИНЯТ &nbsp;·&nbsp; 03:14 &nbsp;·&nbsp; туман 100% &nbsp;·&nbsp; трекинг сбит &nbsp;·&nbsp; не ходи за огнями &nbsp;·&nbsp; CH 03 &nbsp;·&nbsp; REC ●</span>
+      <span>БЕГУЩАЯ СТРОКА &nbsp;·&nbsp; 00:00 &nbsp;·&nbsp; короткие фразы &nbsp;·&nbsp; через точку &nbsp;·&nbsp; сколько угодно &nbsp;·&nbsp; CH 01 &nbsp;·&nbsp; REC ●</span>
     </div>
 
-    <!-- TODO(human): заголовок и 2–4 абзаца о том, что это за место и что за канал.
-         Единственное место на странице с голосом автора. Ниже, в окне signal,
-         подставь адрес канала вместо https://t.me/CHANNEL -->
+    <!-- главное текстовое поле: заголовок и несколько абзацев -->
     <section id="note" class="field reveal" style="--delay: .1s; --m: 2; --y: 95px; --x: 347px; --w: 1021px;">
       <h2>заголовок записки</h2>
       <p>Текст записки.</p>
     </section>
 
-    <!-- placeholder: цитата. Замени строкой песни / псалма / надписью с флага -->
+    <!-- цитата: одна-две строки курсивом -->
     <blockquote class="scrawl quote reveal" style="--tilt: -1.5deg; --delay: .3s; --m: 3; --y: 240px; --x: 462px; --w: 789px;">
-      Where the pines are so thick the light comes down green
-      <cite>— placeholder · строка цитаты</cite>
+      Строка цитаты — одна или две фразы, набранные курсивом
+      <cite>— источник цитаты</cite>
     </blockquote>
 
     <section id="signal" class="field term reveal" style="--delay: .2s; --m: 4; --y: 403px; --x: 347px; --w: 443px;">
-      <h2>signal.exe</h2>
-      <p>&gt; source: telegram<br>&gt; status: online<span class="blink">_</span></p>
-      <a class="cta" href="https://t.me/CHANNEL">войти в канал</a>
+      <h2>window.exe</h2>
+      <p>&gt; source: example<br>&gt; status: online<span class="blink">_</span></p>
+      <a class="cta" href="#">кнопка-ссылка</a>
     </section>
 
     <section id="now" class="field reveal" style="--delay: .25s; --m: 5; --y: 403px; --x: 809px; --w: 559px;">
       <h2>сейчас</h2>
       <dl>
-        <dt>слушаю</dt><dd>Crystal Castles — Crimewave</dd>
-        <dt>снимаю</dt><dd>ФЭД-5В, плёнка 12/36</dd>
+        <dt>слушаю</dt><dd>Исполнитель — Название трека</dd>
+        <dt>смотрю</dt><dd>Название фильма, 1999</dd>
         <dt>читаю</dt><dd>—</dd>
       </dl>
     </section>
 
     <!-- вырезка «из газеты»: любой PNG с альфой из img/, обводка ляжет по силуэту -->
     <figure class="cutout glitch reveal" style="--tilt: -2deg; --w: 300px; --delay: .4s; --m: 6; --y: 665px; --x: -10px;">
-      <img src="img/milkchan.png" alt="девушка в худи со знаком ∅, ночь" width="300">
-      <figcaption>fig. 1 — ночной дозор</figcaption>
+      <img src="img/figure.png" alt="вырезка: фигура на однотонном фоне" width="300">
+      <figcaption>fig. 1 — подпись вырезки</figcaption>
     </figure>
 
-    <!-- фото в полях: одно заходит на другое (--r пересекаются, --dx/--dy сдвигают) -->
+    <!-- фото в рамках: одно заходит на другое -->
     <figure id="photos" class="field pic fx-stretch fx-channel reveal" style="--ar: 3 / 2; --delay: .35s; --m: 7; --y: 665px; --x: 347px; --w: 559px;">
       <div class="frame fx-dither glitch">
-        <img src="img/bg-forest.jpg" alt="сосновый склон в тумане">
+        <img src="img/photo-1.jpg" alt="пример фото">
       </div>
       <figcaption>fig. 2 — channel mixer · stretch · dither</figcaption>
     </figure>
 
     <figure class="field pic reveal" style="--ar: 4 / 3; --delay: .45s; --m: 8; --y: 916px; --x: 781px; --w: 559px;">
       <div class="frame glitch">
-        <!-- placeholder: сюда скан с ФЭД-5В -->
-        <img src="img/bg-forest.jpg" alt="placeholder: скан с плёнки">
+        <img src="img/photo-2.jpg" alt="пример фото">
       </div>
-      <figcaption>fig. 3 — placeholder · кадр 12/36</figcaption>
+      <figcaption>fig. 3 — подпись фото</figcaption>
     </figure>
 
-    <!-- placeholder: мысль на полях -->
+    <!-- заметка на полях -->
     <p class="scrawl note reveal" style="--tilt: 1deg; --delay: .5s; --m: 9; --y: 1366px; --x: 116px; --w: 378px;">
-      Записки на полях: одна-две фразы в духе канала, без рамки, как надпись карандашом.
+      Заметка на полях: одна-две фразы без рамки, как надпись карандашом.
     </p>
 
-    <!-- placeholder: служебная надпись как текстура -->
+    <!-- служебная надпись как текстура -->
     <p class="scrawl meta reveal" style="--tilt: -.5deg; --delay: .55s; --m: 10; --y: 1366px; --x: 925px; --w: 304px;">
-      47°N 121°W · rec 03:14 · tape 07 · no signal
+      00°N 00°W · rec 00:00 · tape 01 · no signal
     </p>
 
     <section id="archive" class="field reveal" style="--delay: .6s; --m: 11; --y: 1488px; --x: 347px; --w: 1021px;">
       <h2>что здесь собрано</h2>
       <ul>
-        <li>southern gothic — болота, проповеди, семейные тайны</li>
-        <li>folk и appeal to heaven — сосна на белом, старая печать</li>
-        <li>crystal castles, milkchan — кассетный интернет нулевых</li>
-        <li>плёнка — ФЭД-5В, туман, горы</li>
+        <li>первый раздел — о чём он в одной строке</li>
+        <li>второй раздел — о чём он в одной строке</li>
+        <li>третий раздел — о чём он в одной строке</li>
+        <li>четвёртый раздел — о чём он в одной строке</li>
       </ul>
     </section>
 
@@ -112,21 +107,21 @@
         <li><a href="#note">записка</a></li>
         <li><a href="#signal">сигнал</a></li>
         <li><a href="#now">сейчас</a></li>
-        <li><a href="#photos">плёнка</a></li>
+        <li><a href="#photos">фото</a></li>
         <li><a href="#archive">архив</a></li>
       </ul>
     </nav>
 
     <div class="buttons reveal shared" id="s-buttons" style="--delay: .15s; --m: 13; --y: 403px; --x: 0px; --w: 328px;">
-      <a class="b88 red" href="#">APPEAL TO HEAVEN</a>
+      <a class="b88 red" href="#">КНОПКА 88×31</a>
       <a class="b88" href="https://neocities.org">neocities</a>
-      <a class="b88 paper" href="#">no AI art</a>
+      <a class="b88 paper" href="#">ещё кнопка</a>
       <a class="b88" href="#">✶ link me</a>
     </div>
 
     <footer class="shared" id="s-footer" style="--y: 1714px; --m: 14;">
-      <span>посетителей: <span class="counter">000413</span></span>
-      <span>обновлено: 2026-09-30</span>
+      <span>посетителей: <span class="counter">000000</span></span>
+      <span>обновлено: 2026-01-01</span>
       <span>hosted on neocities · сделано руками</span>
     </footer>
 

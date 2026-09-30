@@ -252,11 +252,17 @@ def process_all(site, images=None, cursors_cfg=None, active_bg=None, only=None, 
             else: process_bg(f, dst, images['bg'])
             written.append(dst.name)
     if want('cutout'):
-        for d in cutout_lines(site):
-            try:
-                process_cutout(site, d, images['cutout'], debug_dir); written.append(d['name'] + '.png')
-            except ApiError as e:
-                warnings.append(str(e))
+        if asis_all or images['cutout'].get('mode') == 'asis':      # без magick (или «как есть»): готовые PNG копируются, остальное пропускается
+            for f in sorted((site.src / 'cutout').glob('*.png')) if (site.src / 'cutout').is_dir() else []:
+                copy_asis(f, site.img / f.name); written.append(f.name)
+            skipped = [f.name for f in (site.src / 'cutout').iterdir() if f.is_file() and f.suffix.lower() != '.png'] if (site.src / 'cutout').is_dir() else []
+            if skipped and asis_all: warnings.append('вырезки без ImageMagick не собираются: ' + ', '.join(skipped))
+        else:
+            for d in cutout_lines(site):
+                try:
+                    process_cutout(site, d, images['cutout'], debug_dir); written.append(d['name'] + '.png')
+                except ApiError as e:
+                    warnings.append(str(e))
     for typ, fn in (('pic', process_pic), ('ghost', process_ghost), ('stamp', process_stamp)):
         if not want(typ): continue
         for f in sorted((site.src / typ).iterdir()) if (site.src / typ).is_dir() else []:

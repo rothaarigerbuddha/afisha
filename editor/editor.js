@@ -53,6 +53,7 @@ ifr.addEventListener('load', async () => {
   refresh(); select(null); updateSingles();
   if (state.theme_error) fail({ error: state.theme_error, hint: t('st.theme_stub') });
   else { sayk('st.ready'); if (THEME.warnings.length) say(t('st.ready') + t('st.theme_warn', { w: THEME.warnings[0] })); }
+  if (state.magick && !state.magick.found && !sessionStorage.getItem('ed-magick-warned')) { sessionStorage.setItem('ed-magick-warned', '1'); fail({ error: t('st.no_magick'), hint: state.magick.hint }); }
 });
 const isPhone = () => canvas.classList.contains('phone');
 

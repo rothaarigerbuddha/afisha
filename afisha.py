@@ -7,14 +7,14 @@
   python3 afisha.py process <папка> [--all-bg]                      пересобрать картинки
 
 Нужны Python 3.9+ и ImageMagick 7 (magick). Без ImageMagick редактор работает, картинки кладутся как есть."""
-import argparse, os, shutil, sys, threading, time, webbrowser
+import argparse, os, re, shutil, sys, threading, time, webbrowser
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
 if sys.version_info < (3, 9):
     print('afisha: нужен Python 3.9 или новее, а это ' + sys.version.split()[0]); sys.exit(2)
-try: sys.stdout.reconfigure(encoding='utf-8', errors='replace'); sys.stderr.reconfigure(encoding='utf-8', errors='replace')
+try: sys.stdout.reconfigure(encoding='utf-8', errors='replace', line_buffering=True); sys.stderr.reconfigure(encoding='utf-8', errors='replace', line_buffering=True)
 except AttributeError: pass
 
 from server.site import Site
@@ -95,6 +95,23 @@ def cmd_check(a):
     if a.site:
         site = open_site(a.site)
         say('сайт:', site.root, '| страницы:', ', '.join(site.pages()))
+        th, err, legacy = theme.load(site)
+        if err: say('тема:', err)
+        elif legacy: say('тема: legacy (нет _afisha/theme.json)')
+        else:
+            say('тема:', th['name'], '| видов:', len(th['kinds']), '| блоков:', len(th['blocks']))
+            css = site.read(site.root / 'style.css') if (site.root / 'style.css').exists() else ''
+            missing = []
+            for k in th['kinds']:
+                m = k['match']
+                for cls in re.findall(r'\.([\w-]+)', m):
+                    if '.' + cls not in css: missing.append(f'{k["kind"]}: в style.css нет .{cls}')
+            for e in th.get('effects', []):
+                if '.' + e['cls'] not in css: missing.append(f'эффект {e["cls"]}: нет в style.css')
+            for c in th.get('colors', []):
+                if '--' + c['id'] not in css: missing.append(f'цвет --{c["id"]}: в style.css не используется')
+            for m in missing: say('  ⚠', m)
+            if not missing: say('  манифест и style.css согласованы (грубая проверка по именам)')
 
 
 def cmd_process(a):

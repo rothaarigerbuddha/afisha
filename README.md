@@ -5,7 +5,7 @@
 заливка на Neocities. Живая страница — статичный HTML и CSS без скриптов; весь JavaScript живёт только в
 редакторе на вашем компьютере.
 
-**Статус: в разработке (шаги 1–4 из плана: перенос, конвейер картинок, манифест темы, интерфейс ru/en).** English README: `README.en.md` (скоро).
+**Статус: в разработке (шаги 1–4 из плана: перенос, конвейер картинок, манифест темы, интерфейс ru/en).** English README: `README.en.md`.
 
 Язык интерфейса редактора переключается в верхней панели (ru / en); по умолчанию русский.
 
@@ -20,8 +20,23 @@ python3 afisha.py ~/my-site                          # открыть редак
 python3 afisha.py check                              # проверить зависимости
 ```
 
-На Windows: `start.bat <папка сайта>` (Python и ImageMagick ставятся официальными инсталляторами с галочкой
-«Add to PATH»). На Linux/macOS: `./start.sh <папка сайта>`.
+### Windows
+
+1. Поставить Python с python.org, отметив **Add python.exe to PATH**.
+2. Поставить ImageMagick 7 с imagemagick.org (инсталлятор Q16-HDRI), отметив **Add application directory to your
+   system path**. Галочку «install legacy utilities» не ставить: `convert.exe` совпадает с системной утилитой Windows,
+   afisha пользуется только `magick`.
+3. Запускать `start.bat <папка сайта>` из папки afisha (или `python afisha.py <папка сайта>`).
+
+Папку сайта держать ближе к корню диска (`C:\sites\my-site`): длинные пути не нравятся ImageMagick и Python.
+
+### Linux / macOS
+
+`./start.sh <папка сайта>` или `python3 afisha.py <папка сайта>`. ImageMagick — из пакетного менеджера
+(`imagemagick` 7.x; на Debian/Ubuntu проверить, что есть команда `magick`, а не только `convert`).
+
+Если ImageMagick не найден, редактор предупредит при запуске и в статусе; загруженные картинки лягут на сайт как
+есть (вырезки — только из готовых PNG с прозрачностью).
 
 ## Папка сайта
 
@@ -45,8 +60,10 @@ _afisha/                      theme.json, site.json, cutouts.txt, backups/, neoc
 ## Тесты
 
 ```
-python3 tests/run.py            # харнессы в headless Firefox на копии tests/fixture-forest
+python3 tests/run.py            # харнессы редактора в headless Firefox на копии tests/fixture-*
 python3 tests/run.py --shots    # + скриншоты index.html при 1920 и 400 px в tests/out/
+python3 tests/test_images.py    # конвейер картинок против эталонного bash-скрипта (байт в байт)
+python3 tests/test_theme.py     # валидация манифеста и генерация theme.css
 ```
 
 ## Лицензия

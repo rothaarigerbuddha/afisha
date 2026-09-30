@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="ru"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>tapes</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- слой 0: фон. Картинка задаётся в style.css → --bg-image -->
+<div class="bg fx-dither" aria-hidden="true"></div>
+
+<div class="page">
+
+  <!-- слой 1: призраки. Лежат ЗА полями, смешиваются с лесом (screen).
+       --x / --rx: отступ слева / справа; --y: сверху; --w: ширина; --o: прозрачность -->
+  <div class="ghosts" aria-hidden="true">
+    <figure class="ghost" style="--rx: -9%; --y: 4%; --w: 42%; --o: .85">
+      <img src="img/ghost-water.jpg" alt="">
+    </figure>
+  </div>
+
+  <!-- слой 2: сетка. 12 колонок. --c: колонки, --r: ряды (как в CSS grid: от/до).
+       Правило: текстовые поля не делят ряды с другими текстовыми полями.
+       На телефоне сетка становится колонкой в порядке, в котором блоки идут здесь. -->
+  <main class="stage">
+
+    <!-- название: пустой слот. Текст, картинка-логотип или ничего — решается позже -->
+    <header class="masthead shared" id="s-masthead" style="--m: 0; --y: 0px;"></header>
+
+    <div class="ticker reveal shared" id="s-ticker" style="--m: 1; --y: 31px;" aria-hidden="true">
+      <span>СИГНАЛ ПРИНЯТ &nbsp;·&nbsp; 03:14 &nbsp;·&nbsp; туман 100% &nbsp;·&nbsp; трекинг сбит &nbsp;·&nbsp; не ходи за огнями &nbsp;·&nbsp; CH 03 &nbsp;·&nbsp; REC ●</span>
+    </div>
+
+    <!-- TODO(human): заголовок и 2–4 абзаца о том, что это за место и что за канал.
+         Единственное место на странице с голосом автора. Ниже, в окне signal,
+         подставь адрес канала вместо https://t.me/CHANNEL -->
+    
+
+    <!-- placeholder: цитата. Замени строкой песни / псалма / надписью с флага -->
+    
+
+    
+
+    
+
+    <!-- вырезка «из газеты»: любой PNG с альфой из img/, обводка ляжет по силуэту -->
+    
+
+    <!-- фото в полях: одно заходит на другое (--r пересекаются, --dx/--dy сдвигают) -->
+    
+
+    
+
+    <!-- placeholder: мысль на полях -->
+    
+
+    <!-- placeholder: служебная надпись как текстура -->
+    
+
+    
+
+    <!-- оглавление-якоря: на десктопе левая колонка, на телефоне — в конце -->
+    <nav class="trails reveal shared" id="s-trails" style="--m: 2; --y: 95px; --x: 0px; --w: 328px;" aria-label="разделы">
+      <ul>
+        <li><a href="#note">записка</a></li>
+        <li><a href="#signal">сигнал</a></li>
+        <li><a href="#now">сейчас</a></li>
+        <li><a href="#photos">плёнка</a></li>
+        <li><a href="#archive">архив</a></li>
+      </ul>
+    </nav>
+
+    <div class="buttons reveal shared" id="s-buttons" style="--delay: .15s; --m: 3; --y: 328px; --x: 0px; --w: 328px;">
+      <a class="b88 red" href="#">APPEAL TO HEAVEN</a>
+      <a class="b88" href="https://neocities.org">neocities</a>
+      <a class="b88 paper" href="#">no AI art</a>
+      <a class="b88" href="#">✶ link me</a>
+    </div>
+
+    <section class="field reveal" style="--m: 4; --y: 95px; --x: 347px; --w: 1021px;"><h2>tapes</h2><p>Текст.</p></section><footer class="shared" id="s-footer" style="--y: 420px; --m: 5;">
+      <span>посетителей: <span class="counter">000413</span></span>
+      <span>обновлено: 2026-09-30</span>
+      <span>hosted on neocities · сделано руками</span>
+    </footer>
+
+  </main>
+</div>
+
+<!-- слой 3: экран -->
+<div class="grain" aria-hidden="true"></div>
+<div class="scanlines" aria-hidden="true"></div>
+<div class="tracking" aria-hidden="true"></div>
+<div class="vignette" aria-hidden="true"></div>
+
+<!-- SVG-фильтры для .fx-channel и .fx-crt (не картинки, только матрицы) -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <filter id="channel" color-interpolation-filters="sRGB">
+    <feColorMatrix type="matrix" values="
+      0.10 0.20 0.90 0 0
+      0.15 0.85 0.10 0 0
+      0.80 0.10 0.20 0 0
+      0    0    0    1 0"></feColorMatrix>
+  </filter>
+  <filter id="crt" color-interpolation-filters="sRGB">
+    <feOffset in="SourceGraphic" dx="2" dy="0" result="r"></feOffset>
+    <feColorMatrix in="r" type="matrix" values="1 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 1 0" result="rr"></feColorMatrix>
+    <feOffset in="SourceGraphic" dx="-2" dy="0" result="b"></feOffset>
+    <feColorMatrix in="b" type="matrix" values="0 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 1 0" result="bb"></feColorMatrix>
+    <feBlend in="rr" in2="bb" mode="screen"></feBlend>
+  </filter>
+</svg>
+
+
+</body></html>

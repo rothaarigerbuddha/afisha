@@ -1,0 +1,5 @@
+Шрифты распространяются по SIL Open Font License 1.1 (https://openfontlicense.org):
+  IM Fell English — Igino Marini (iginomarini.com)
+  Old Standard TT — Alexey Kryukov
+  Tiny5 — Stefan Schmidt
+Файлы .woff2 — подмножества (latin / cyrillic), собранные из оригинальных TTF.

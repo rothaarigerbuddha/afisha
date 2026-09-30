@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>entropic division</title>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="layout.css">
+</head>
+<body>
+
+<!-- слой 0: фон. Картинка задаётся в style.css → --bg-image -->
+<div class="bg fx-dither" aria-hidden="true"></div>
+
+<div class="page">
+
+  <!-- слой 1: призраки. Лежат ЗА полями, смешиваются с лесом (screen).
+       --x / --rx: отступ слева / справа; --y: сверху; --w: ширина; --o: прозрачность -->
+  <div class="ghosts" aria-hidden="true">
+    <figure class="ghost" style="--rx: -9%; --y: 4%; --w: 42%; --o: .85">
+      <img src="img/ghost-water.jpg" alt="">
+    </figure>
+  </div>
+
+  <!-- слой 2: сетка. 12 колонок. --c: колонки, --r: ряды (как в CSS grid: от/до).
+       Правило: текстовые поля не делят ряды с другими текстовыми полями.
+       На телефоне сетка становится колонкой в порядке, в котором блоки идут здесь. -->
+  <main class="stage">
+
+    <!-- название: пустой слот. Текст, картинка-логотип или ничего — решается позже -->
+    <header class="masthead shared" id="s-masthead" style="--m: 0; --y: 0px;"></header>
+
+    <div class="ticker reveal shared" id="s-ticker" style="--m: 1; --y: 31px;" aria-hidden="true">
+      <span>СИГНАЛ ПРИНЯТ &nbsp;·&nbsp; 03:14 &nbsp;·&nbsp; туман 100% &nbsp;·&nbsp; трекинг сбит &nbsp;·&nbsp; не ходи за огнями &nbsp;·&nbsp; CH 03 &nbsp;·&nbsp; REC ●</span>
+    </div>
+
+    <!-- TODO(human): заголовок и 2–4 абзаца о том, что это за место и что за канал.
+         Единственное место на странице с голосом автора. Ниже, в окне signal,
+         подставь адрес канала вместо https://t.me/CHANNEL -->
+    <section id="note" class="field reveal" style="--delay: .1s; --m: 2; --y: 95px; --x: 347px; --w: 1021px;">
+      <h2>заголовок записки</h2>
+      <p>Текст записки.</p>
+    </section>
+
+    <!-- placeholder: цитата. Замени строкой песни / псалма / надписью с флага -->
+    <blockquote class="scrawl quote reveal" style="--tilt: -1.5deg; --delay: .3s; --m: 3; --y: 240px; --x: 462px; --w: 789px;">
+      Where the pines are so thick the light comes down green
+      <cite>— placeholder · строка цитаты</cite>
+    </blockquote>
+
+    <section id="signal" class="field term reveal" style="--delay: .2s; --m: 4; --y: 403px; --x: 347px; --w: 443px;">
+      <h2>signal.exe</h2>
+      <p>&gt; source: telegram<br>&gt; status: online<span class="blink">_</span></p>
+      <a class="cta" href="https://t.me/CHANNEL">войти в канал</a>
+    </section>
+
+    <section id="now" class="field reveal" style="--delay: .25s; --m: 5; --y: 403px; --x: 809px; --w: 559px;">
+      <h2>сейчас</h2>
+      <dl>
+        <dt>слушаю</dt><dd>Crystal Castles — Crimewave</dd>
+        <dt>снимаю</dt><dd>ФЭД-5В, плёнка 12/36</dd>
+        <dt>читаю</dt><dd>—</dd>
+      </dl>
+    </section>
+
+    <!-- вырезка «из газеты»: любой PNG с альфой из img/, обводка ляжет по силуэту -->
+    <figure class="cutout glitch reveal" style="--tilt: -2deg; --w: 300px; --delay: .4s; --m: 6; --y: 665px; --x: -10px;">
+      <img src="img/milkchan.png" alt="девушка в худи со знаком ∅, ночь" width="300">
+      <figcaption>fig. 1 — ночной дозор</figcaption>
+    </figure>
+
+    <!-- фото в полях: одно заходит на другое (--r пересекаются, --dx/--dy сдвигают) -->
+    <figure id="photos" class="field pic fx-stretch fx-channel reveal" style="--ar: 3 / 2; --delay: .35s; --m: 7; --y: 665px; --x: 347px; --w: 559px;">
+      <div class="frame fx-dither glitch">
+        <img src="img/bg-forest.jpg" alt="сосновый склон в тумане">
+      </div>
+      <figcaption>fig. 2 — channel mixer · stretch · dither</figcaption>
+    </figure>
+
+    <figure class="field pic reveal" style="--ar: 4 / 3; --delay: .45s; --m: 8; --y: 916px; --x: 781px; --w: 559px;">
+      <div class="frame glitch">
+        <!-- placeholder: сюда скан с ФЭД-5В -->
+        <img src="img/bg-forest.jpg" alt="placeholder: скан с плёнки">
+      </div>
+      <figcaption>fig. 3 — placeholder · кадр 12/36</figcaption>
+    </figure>
+
+    <!-- placeholder: мысль на полях -->
+    <p class="scrawl note reveal" style="--tilt: 1deg; --delay: .5s; --m: 9; --y: 1366px; --x: 116px; --w: 378px;">
+      Записки на полях: одна-две фразы в духе канала, без рамки, как надпись карандашом.
+    </p>
+
+    <!-- placeholder: служебная надпись как текстура -->
+    <p class="scrawl meta reveal" style="--tilt: -.5deg; --delay: .55s; --m: 10; --y: 1366px; --x: 925px; --w: 304px;">
+      47°N 121°W · rec 03:14 · tape 07 · no signal
+    </p>
+
+    <section id="archive" class="field reveal" style="--delay: .6s; --m: 11; --y: 1488px; --x: 347px; --w: 1021px;">
+      <h2>что здесь собрано</h2>
+      <ul>
+        <li>southern gothic — болота, проповеди, семейные тайны</li>
+        <li>folk и appeal to heaven — сосна на белом, старая печать</li>
+        <li>crystal castles, milkchan — кассетный интернет нулевых</li>
+        <li>плёнка — ФЭД-5В, туман, горы</li>
+      </ul>
+    </section>
+
+    <!-- оглавление-якоря: на десктопе левая колонка, на телефоне — в конце -->
+    <nav class="trails reveal shared" id="s-trails" style="--m: 12; --y: 95px; --x: 0px; --w: 328px;" aria-label="разделы">
+      <ul>
+        <li><a href="#note">записка</a></li>
+        <li><a href="#signal">сигнал</a></li>
+        <li><a href="#now">сейчас</a></li>
+        <li><a href="#photos">плёнка</a></li>
+        <li><a href="#archive">архив</a></li>
+      </ul>
+    </nav>
+
+    <div class="buttons reveal shared" id="s-buttons" style="--delay: .15s; --m: 13; --y: 403px; --x: 0px; --w: 328px;">
+      <a class="b88 red" href="#">APPEAL TO HEAVEN</a>
+      <a class="b88" href="https://neocities.org">neocities</a>
+      <a class="b88 paper" href="#">no AI art</a>
+      <a class="b88" href="#">✶ link me</a>
+    </div>
+
+    <footer class="shared" id="s-footer" style="--y: 1714px; --m: 14;">
+      <span>посетителей: <span class="counter">000413</span></span>
+      <span>обновлено: 2026-09-30</span>
+      <span>hosted on neocities · сделано руками</span>
+    </footer>
+
+  </main>
+</div>
+
+<!-- слой 3: экран -->
+<div class="grain" aria-hidden="true"></div>
+<div class="scanlines" aria-hidden="true"></div>
+<div class="tracking" aria-hidden="true"></div>
+<div class="vignette" aria-hidden="true"></div>
+
+<!-- SVG-фильтры для .fx-channel и .fx-crt (не картинки, только матрицы) -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <filter id="channel" color-interpolation-filters="sRGB">
+    <feColorMatrix type="matrix" values="
+      0.10 0.20 0.90 0 0
+      0.15 0.85 0.10 0 0
+      0.80 0.10 0.20 0 0
+      0    0    0    1 0"/>
+  </filter>
+  <filter id="crt" color-interpolation-filters="sRGB">
+    <feOffset in="SourceGraphic" dx="2" dy="0" result="r"/>
+    <feColorMatrix in="r" type="matrix" values="1 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 1 0" result="rr"/>
+    <feOffset in="SourceGraphic" dx="-2" dy="0" result="b"/>
+    <feColorMatrix in="b" type="matrix" values="0 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 1 0" result="bb"/>
+    <feBlend in="rr" in2="bb" mode="screen"/>
+  </filter>
+</svg>
+</body>
+</html>

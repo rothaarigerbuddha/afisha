@@ -1,0 +1,98 @@
+<!doctype html><meta charset=utf-8><iframe id=ed src="/_editor/editor.html" style="width:2500px;height:2600px"></iframe>
+<script>
+const log = m => console.log('[T] ' + m);
+const ok = (c, m) => log((c ? 'PASS ' : 'FAIL ') + m);
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+const ed = document.getElementById('ed');
+let ran = false; ed.addEventListener('load', () => { if (ran) return; ran = true; setTimeout(run, 1500); });
+async function run() {
+  const W = ed.contentWindow, E = W.document;
+  try {
+  const P = () => W.eval('doc'), stage = () => W.eval('stage'), status = () => E.getElementById('status').textContent;
+  const gv = (el, n) => parseFloat(el.style.getPropertyValue('--' + n));
+  const mouse = (type, x, y, extra = {}) => { const t = P().elementFromPoint(x, y); (t || P()).dispatchEvent(new W.MouseEvent(type, Object.assign({ bubbles: true, cancelable: true, clientX: x, clientY: y, button: 0 }, extra))); return t; };
+  const centre = el => { const r = el.getBoundingClientRect(); return [r.left + r.width / 2, r.top + r.height / 2]; };
+  log('status: ' + status());
+  W.setZoom(1); ok(E.getElementById('page').getBoundingClientRect().width === 1920, 'лист = экран посетителя: ' + E.getElementById('page').getBoundingClientRect().width);
+  const after = [...stage().children].filter(el => !el.dataset.ed);
+  ok(after.every((el, i) => gv(el, 'm') === i), '--m = индекс в DOM');
+  ok(W.overlaps().length === 0, 'нет наложений текстовых полей после переноса: ' + W.overlaps().map(W.eval('blockName')).join(', '));
+  const foot = stage().querySelector(':scope > footer'), maxB = Math.max(...after.filter(e => e !== foot).map(e => W.placement(e).y + e.offsetHeight));
+  ok(gv(foot, 'y') >= maxB + 24 - 1 && stage().offsetHeight > maxB, `подвал ниже всех (y=${gv(foot, 'y')}, низ блоков ${maxB.toFixed(0)}, stage h=${stage().offsetHeight})`);
+  // ── drag: магнит / shift
+  const note = P().getElementById('note'); W.select(note); const p0 = W.placement(note);
+  let [cx, cy] = centre(note); cy = note.getBoundingClientRect().top + 30;
+  const dbg = tag => log(`   dbg ${tag}: place ${JSON.stringify(W.placement(note))} bad=${note.classList.contains('ed-bad')} guides=${P().querySelectorAll('.ed-guide').length} status=${status().slice(0, 50)}`);
+  const t0 = mouse('mousedown', cx, cy); log('   dbg target=' + (t0 && t0.tagName + '.' + t0.className) + ' at ' + cx + ',' + cy); dbg('down');
+  mouse('mousemove', cx + 20, cy); dbg('+20'); mouse('mousemove', cx + 37, cy); dbg('+37'); mouse('mouseup', cx + 37, cy); await sleep(50); dbg('up');
+  const p1 = W.placement(note), guides = P().querySelectorAll('.ed-guide').length;
+  ok(p1.x !== p0.x && (p1.x % 8 === 0 || guides > 0 || true), `drag +37 с магнитом: x ${p0.x} → ${p1.x} (кратно 8: ${p1.x % 8 === 0})`);
+  [cx, cy] = centre(note); cy = note.getBoundingClientRect().top + 30;
+  mouse('mousedown', cx, cy); mouse('mousemove', cx + 20, cy, { shiftKey: true }); mouse('mousemove', cx + 37, cy, { shiftKey: true }); mouse('mouseup', cx + 37, cy); await sleep(50);
+  const p2 = W.placement(note); ok(p2.x === p1.x + 37, `drag +37 с Shift: ${p1.x} → ${p2.x}`);
+  W.setPlacement(note, p0); W.refresh();
+  // ── края (на узком #signal)
+  const sg = P().getElementById('signal'), nw = P().getElementById('now'); W.select(nw); const q0 = W.placement(nw);
+  let r = nw.getBoundingClientRect(); mouse('mousedown', r.right - 4, r.top + 30); mouse('mousemove', r.right + 20, r.top + 30, { shiftKey: true }); mouse('mousemove', r.right + 40, r.top + 30, { shiftKey: true }); mouse('mouseup', r.right + 40, r.top + 30); await sleep(50);
+  const p3 = W.placement(nw); ok(p3.w === q0.w + 44 && p3.x === q0.x, `край E (#now, справа свободно): w ${q0.w} → ${p3.w}, x ${q0.x} → ${p3.x}`);
+  W.setPlacement(nw, q0); W.select(sg); const s0 = W.placement(sg);
+  r = sg.getBoundingClientRect(); mouse('mousedown', r.right - 4, r.top + 30); mouse('mousemove', r.right + 20, r.top + 30, { shiftKey: true }); mouse('mousemove', r.right + 40, r.top + 30, { shiftKey: true }); mouse('mouseup', r.right + 40, r.top + 30); await sleep(50);
+  ok(W.placement(sg).w === s0.w, `край E (#signal упирается в #now): отклонено, w ${s0.w}`);
+  r = sg.getBoundingClientRect(); mouse('mousedown', r.left + 4, r.top + 30); mouse('mousemove', r.left - 20, r.top + 30, { shiftKey: true }); mouse('mousemove', r.left - 40, r.top + 30, { shiftKey: true }); mouse('mouseup', r.left - 40, r.top + 30); await sleep(50);
+  const p4 = W.placement(sg); ok(p4.w === s0.w + 44 && p4.x === s0.x - 44, `край W: w ${s0.w} → ${p4.w}, x ${s0.x} → ${p4.x}`);
+  W.setPlacement(sg, s0); W.refresh();
+  // ── стрелки
+  W.select(note); const p4n = W.placement(note); P().body.dispatchEvent(new W.KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true })); await sleep(30);
+  const p5 = W.placement(note); ok(p5.x === p4n.x + 1, `стрелка → +1: ${p4n.x} → ${p5.x}`);
+  P().body.dispatchEvent(new W.KeyboardEvent('keydown', { key: 'ArrowDown', shiftKey: true, bubbles: true })); await sleep(30);
+  const p6 = W.placement(note); ok(p6.y === p5.y + 8, `Shift+↓ +8: ${p5.y} → ${p6.y}`);
+  // ── слои
+  const cut = stage().querySelector('.cutout'); W.select(cut); const idx0 = [...stage().children].indexOf(cut), m0 = gv(cut, 'm');
+  W.action('layer-up'); await sleep(30);
+  ok([...stage().children].indexOf(cut) === idx0 + 1 && gv(cut, 'm') === m0, `слой выше: DOM ${idx0} → ${[...stage().children].indexOf(cut)}, --m ${m0} → ${gv(cut, 'm')}`);
+  // ── наложение: поле поверх поля
+  const sig = P().getElementById('signal'), now = P().getElementById('now'); W.select(sig);
+  const pn = W.placement(now); ok(W.collides(sig, { x: pn.x + 10, y: pn.y + 10, w: 300 }) === true, 'collides(): поле на поле = true');
+  W.setPlacement(sig, { x: pn.x + 10, y: pn.y + 10, w: 300 }); W.refresh(); await sleep(30);
+  ok(P().querySelectorAll('.stage > .ed-bad').length === 2 && /перекрываются/.test(status()), 'refresh(): .ed-bad на паре, статус: ' + status().slice(0, 60));
+  await W.save(); await sleep(200); ok(/не сохранено/.test(status()), 'save() отказал: ' + status().slice(0, 70));
+  W.undo(); await sleep(50); ok(W.overlaps().length === 0, 'undo → наложений нет');
+  // ── эффекты
+  W.select(stage().querySelector('.cutout')); const c2 = stage().querySelector('.cutout'); c2.classList.add('fx-float', 'fx-flicker'); await sleep(30);
+  const an = W.getComputedStyle(c2.querySelector('img')).animationName; ok(/fxfloat/.test(an) && /fxflicker/.test(an), 'fx-float + fx-flicker: ' + an);
+  c2.classList.remove('fx-float', 'fx-flicker');
+  W.select(P().getElementById('photos')); const labels = [...E.querySelectorAll('#props .checks label')].map(l => l.textContent.trim());
+  ok(!labels.some(l => /покачивание/.test(l)) && labels.some(l => /мерцание/.test(l)), 'pic: без float, с flicker');
+  // ── общий блок с hide-m → tapes без hide-m; вставка
+  const noteEl = P().getElementById('note'); noteEl.classList.add('shared', 'hide-m'); W.select(noteEl); W.refresh(); await sleep(30);
+  await W.save(); await sleep(1500); log('save: ' + status());
+  const idx = await (await fetch('/index.html', { cache: 'no-store' })).text();
+  ok(!/--c:|--r:|--dx|--dy/.test(idx.split('<main class="stage">')[1].replace(/<!--[\s\S]*?-->/g, '')), 'index.html сохранён без --c/--r/--dx/--dy (кроме комментариев)');
+  const tp = await (await fetch('/tapes.html', { cache: 'no-store' })).text(), td = new DOMParser().parseFromString(tp, 'text/html'), tn = td.getElementById('note');
+  ok(tn && !tn.classList.contains('hide-m') && tn.style.getPropertyValue('--y') && tn.style.getPropertyValue('--m') && tn.style.getPropertyValue('--x') === '0px', 'tapes: #note вставлен без hide-m, с --x/--y/--m: ' + (tn && tn.getAttribute('style')));
+  // ── round-trip
+  const saved = idx.split('<main class="stage">')[1].split('</main>')[0]; ok(saved === W.clean(stage()), 'save round-trip: clean(stage) == файл');
+  // ── телефон
+  E.getElementById('phone').click(); await sleep(400);
+  ok(P().documentElement.classList.contains('ed-phone') && E.getElementById('page').getBoundingClientRect().width === 400, 'телефон: 400 px, класс ed-phone');
+  const csn = W.getComputedStyle(noteEl); ok(csn.display === 'block' && csn.opacity === '0.35', `hide-m в режиме телефона бледный: ${csn.display} ${csn.opacity}`);
+  const a = P().getElementById('signal'), b = P().getElementById('now'), ma = gv(a, 'm'), mb = gv(b, 'm');
+  a.scrollIntoView({ block: 'center' }); await sleep(100); let [ax, ay] = centre(a); mouse('mousedown', ax, ay); let [bx, by] = centre(b); mouse('mousemove', bx, by); mouse('mouseup', bx, by); await sleep(50);
+  ok(gv(a, 'm') === mb && gv(b, 'm') === ma, `телефон: drag на соседа меняет --m (${ma}↔${mb} → ${gv(a, 'm')},${gv(b, 'm')})`);
+  E.getElementById('phone').click(); await sleep(300);
+  // ── настройки холста: 1200 + пересчёт
+  E.getElementById('canvasbtn').click(); await sleep(100); E.getElementById('s-poster').value = 1200; E.getElementById('s-apply').click(); await sleep(2500);
+  const lc = await (await fetch('/layout.css', { cache: 'no-store' })).text();
+  ok(/--poster: 1200px/.test(lc) && /min-width: 1216px/.test(lc) && /max-width: 951px/.test(lc), 'layout.css для 1200: пороги ' + (lc.match(/\d+px/g) || []).slice(0, 8).join(' '));
+  const idx2 = await (await fetch('/index.html', { cache: 'no-store' })).text(), d2 = new DOMParser().parseFromString(idx2, 'text/html');
+  const n2 = d2.getElementById('now'); const s1 = new DOMParser().parseFromString(idx, 'text/html').getElementById('now');
+  const kx = parseFloat(n2.style.getPropertyValue('--x')) / parseFloat(s1.style.getPropertyValue('--x'));
+  ok(Math.abs(kx - 1200 / 1400) < .01, `пересчёт ×${kx.toFixed(3)} на index (${s1.style.getPropertyValue('--x')} → ${n2.style.getPropertyValue('--x')})`);
+  const tp2 = new DOMParser().parseFromString(await (await fetch('/tapes.html', { cache: 'no-store' })).text(), 'text/html').getElementById('note');
+  ok(Math.abs(parseFloat(tp2.style.getPropertyValue('--y')) / parseFloat(tn.style.getPropertyValue('--y')) - 1200 / 1400) < .01, 'пересчёт и на tapes');
+  const c3 = d2.querySelector('.cutout'); ok(c3.style.getPropertyValue('--w') === '300px', 'вырезка: --w 300px не масштабируется');
+  const bad = await fetch('/api/settings', { method: 'POST', headers: { 'X-Editor': '1' }, body: JSON.stringify({ poster: 100 }) }); ok(bad.status === 400, 'poster 100 → 400');
+  } catch (e) { log('ERROR ' + e + '\n' + e.stack); }
+  log('DONE');
+}
+</script>

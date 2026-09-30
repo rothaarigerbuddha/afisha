@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>afisha — редактор</title>
+<link rel="stylesheet" href="editor.css">
+</head>
+<body>
+<header class="bar">
+  <button id="toggleL" class="toggle on" title="свернуть/развернуть левую панель">◧</button>
+  <strong>afisha</strong>
+  <button id="save" title="Ctrl+S">сохранить</button>
+  <button id="undo" title="Ctrl+Z">отменить</button>
+  <button id="redo" title="Ctrl+Y">повторить</button>
+  <button id="phone" class="toggle">телефон</button>
+  <button id="magnet" class="toggle on" title="шаг 8 px и прилипание к соседям; Shift — отключить на время">магнит</button>
+  <button id="canvasbtn" title="ширина афиши, телефона и экрана посетителя">холст</button>
+  <span class="zoom"><button id="zoomout" title="Ctrl+−">−</button><button id="zoom100" title="100% — как видит посетитель (Ctrl+0)">100%</button><button id="zoomin" title="Ctrl+=">+</button><button id="zoomfit" title="вся страница целиком (Ctrl+1)">вписать</button></span>
+    <select id="pages" title="страница"></select>
+  <button id="newpage" title="новая страница с общими блоками">+ страница</button>
+  <button id="library" title="все картинки img/">картинки</button>
+  <button id="backups" title="версии этой страницы">бэкапы</button>
+  <button id="push" title="залить на Neocities">залить</button>
+  <span id="status" class="status">загрузка…</span>
+  <a class="help" href="/kit.html" target="_blank">kit</a>
+  <button id="toggleR" class="toggle on" title="свернуть/развернуть правую панель">◨</button>
+</header>
+
+<aside class="palette">
+  <h3>добавить блок</h3>
+  <button data-add="field">поле с текстом</button>
+  <button data-add="pic">фото в рамке</button>
+  <button data-add="embed">встраивание (iframe)</button>
+  <button data-add="cutout">вырезка</button>
+  <button data-add="quote">цитата</button>
+  <button data-add="note">заметка на полях</button>
+  <button data-add="meta">служебная строка</button>
+  <button data-add="stamp">штамп / гифка</button>
+  <button data-add="ghost">призрак</button>
+
+  <h3>фон</h3>
+  <select id="bg"></select>
+
+  <h3>загрузить картинку</h3>
+  <select id="uptype">
+    <option value="pic">фото в рамке</option>
+    <option value="cutout">вырезка (с однотонного фона)</option>
+    <option value="ghost">призрак (тёмный кадр)</option>
+    <option value="stamp">штамп / гифка</option>
+    <option value="bg">фон (jpg)</option>
+  </select>
+  <label class="drop" id="drop">
+    <input type="file" id="file" accept="image/*" hidden>
+    перетащи файл сюда<br>или нажми
+  </label>
+  <p class="hint">Файл уйдёт в <code>src/</code>, пройдёт обработку и появится на странице новым блоком.</p>
+
+  <div id="gifsearch" hidden>
+    <h3>найти гифку (GifCities)</h3>
+    <form id="gcform"><input id="gcq" type="search" placeholder="forest, candle, skull…" autocomplete="off"><button type="submit">искать</button></form>
+    <select id="gcflavor" title="как искать"><option value="hybrid">по смыслу и словам</option><option value="semantic">по смыслу (что нарисовано)</option><option value="lexical">по словам (имя файла, страница)</option></select>
+    <div id="gcgrid" class="gcgrid"></div>
+    <button id="gcmore" hidden>ещё</button>
+    <p class="hint">Архив GeoCities от Internet Archive. Клик по гифке скачивает её в <code>src/stamp/</code> и ставит на страницу.</p>
+  </div>
+
+  <h3>подсказки</h3>
+  <p class="hint">Стол: Ctrl+колесо — зум к курсору, Ctrl+0 — 100% (как видит посетитель), Ctrl+1 — вписать, пробел+тянуть или средняя кнопка — двигать. Афиша: тянуть — перемещает (магнит липнет к соседям, Shift отключает), левый/правый край — ширина, стрелки — 1 px (Shift — 8). Слои — в панели справа. Телефон: перетащи блок на другой — поменяются местами. Двойной клик — правка текста (Enter — абзац, Ctrl+I — курсив, Esc — готово). Delete — удалить.</p>
+</aside>
+
+<main class="canvas" id="canvas">
+  <div id="sheet"><iframe id="page" src="/index.html" title="страница"></iframe></div>
+</main>
+
+<div id="textbar" hidden>
+  <button data-cmd="bold" title="жирный (Ctrl+B)"><b>B</b></button>
+  <button data-cmd="italic" title="курсив (Ctrl+I)"><i>I</i></button>
+  <button data-cmd="link" title="ссылка (Ctrl+K)">ссылка</button>
+  <button data-cmd="unlink" title="убрать ссылку">✕</button>
+  <button data-cmd="list" title="список (только в полях)">• список</button>
+  <span class="sw"><button data-color="paper" title="бумага"></button><button data-color="mist" title="туман"></button><button data-color="fog" title="мгла"></button><button data-color="blood" title="кровь"></button><button data-color="" title="без цвета">∅</button></span>
+  <form id="linkform" hidden><input type="text" id="linkurl" placeholder="https://… или #якорь"><button type="submit">ок</button></form>
+</div>
+<div id="modal" hidden><div class="box">
+  <div class="mhead"><strong id="mtitle"></strong><button id="mclose">закрыть</button></div>
+  <div id="mbody"></div>
+</div></div>
+<aside class="props" id="props">
+  <p class="hint">Выбери блок на странице.</p>
+</aside>
+
+<script src="editor.js"></script>
+</body>
+</html>

@@ -1,0 +1,207 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>kit — entropic division</title>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="layout.css">
+<style>
+  /* только для каталога */
+  .page { --l-page: min(100%, 1180px); }   /* каталог — всегда колонка (.stage.flow), не афиша */
+  .kit h1 { font-family: var(--term); font-weight: 400; font-size: 28px; margin: 0 0 6px; color: var(--paper); }
+  .kit .rules { font-size: 16px; }
+  .demo { border: 1px dashed var(--moss); padding: 18px; margin: 0 0 18px; }
+  .demo h3 { font-family: var(--term); font-weight: 400; font-size: 20px; margin: 0 0 12px; color: var(--paper); letter-spacing: .06em; }
+  .demo .ex { margin-bottom: 12px; }
+  pre { font-family: var(--term); font-size: 14px; line-height: 1.35; color: var(--fog); background: var(--night);
+        padding: 10px 12px; overflow-x: auto; margin: 0; border: 1px solid var(--moss); white-space: pre; }
+  .demo .row { display: flex; flex-wrap: wrap; gap: 16px; align-items: flex-start; }
+</style>
+</head>
+<body>
+<div class="bg" aria-hidden="true"></div>
+<div class="page">
+  <div class="ghosts" aria-hidden="true">
+    <figure class="ghost" style="--rx: -4%; --y: 4%; --w: 36%"><img src="img/ghost-water.jpg" alt=""></figure>
+  </div>
+  <main class="stage kit flow">
+
+    <section class="field">
+      <h1>kit — набор блоков</h1>
+      <div class="rules">
+        <p>Каждый блок ниже: живой пример + сниппет. Копируй сниппет в <code>index.html</code> внутрь <code>&lt;main class="stage"&gt;</code>.</p>
+        <p><strong>Правило 1.</strong> Текстовые поля <code>.field</code> не перекрываются (на афише это проверяет редактор и не даёт сохранить). Накладываются только <code>.pic .cutout .scrawl .stamp .ghost</code>.<br>
+        <strong>Правило 2.</strong> На <code>.page .ghosts .stage</code> и их обёртках нет filter / opacity / transform / z-index, иначе призраки перестают смешиваться с фото.<br>
+        <strong>Правило 3.</strong> <code>.fx-dither</code> только на <code>.frame</code> и <code>.bg</code>.</p>
+        <p><strong>Позиция на афише:</strong> <code>style="--x: 320px; --y: 140px; --w: 520px"</code> — пиксели от левого верхнего угла холста, ширина.
+        <strong>Слои:</strong> порядок в HTML (ниже в файле — выше на экране). <strong>Наклон:</strong> <code>--tilt: -2deg</code>.
+        <strong>Колонка</strong> (телефон, узкие окна): позиции не действуют, блоки идут колонкой в порядке <code>--m</code>;
+        <code>hide-m</code> / <code>hide-d</code> прячут блок в колонке / на афише. Подробнее — раздел «афиша и колонка» ниже.</p>
+      </div>
+    </section>
+
+    <div class="demo">
+      <h3>.field — поле с двойной обводкой</h3>
+      <section class="field ex"><h2>заголовок</h2><p>Абзац текста. Сколько угодно строк, поле растянется.</p></section>
+<pre>&lt;section class="field" style="--x: 320px; --y: 140px; --w: 520px; --m: 2"&gt;
+  &lt;h2&gt;заголовок&lt;/h2&gt;
+  &lt;p&gt;Текст.&lt;/p&gt;
+&lt;/section&gt;</pre>
+    </div>
+
+    <div class="demo">
+      <h3>.field.pic — фото в поле (+ эффекты)</h3>
+      <div class="row ex">
+        <figure class="field pic" style="width: 260px"><div class="frame"><img src="img/bg-forest.jpg" alt=""></div><figcaption>чистое</figcaption></figure>
+        <figure class="field pic fx-channel" style="width: 260px"><div class="frame fx-dither"><img src="img/bg-forest.jpg" alt=""></div><figcaption>.fx-channel + .fx-dither</figcaption></figure>
+        <figure class="field pic fx-stretch" style="width: 260px"><div class="frame glitch"><img src="img/bg-forest.jpg" alt=""></div><figcaption>.fx-stretch + .glitch (наведи)</figcaption></figure>
+        <figure class="field pic fx-crt" style="width: 260px"><div class="frame"><img src="img/bg-forest.jpg" alt=""></div><figcaption>.fx-crt</figcaption></figure>
+      </div>
+<pre>&lt;figure class="field pic fx-channel" style="--x: 320px; --y: 620px; --w: 440px; --ar: 3 / 2"&gt;
+  &lt;div class="frame fx-dither glitch"&gt;&lt;img src="img/фото.jpg" alt="…"&gt;&lt;/div&gt;
+  &lt;figcaption&gt;fig. 2 — подпись&lt;/figcaption&gt;
+&lt;/figure&gt;
+эффекты на figure: .fx-stretch .fx-channel .fx-crt   на .frame: .fx-dither .glitch   --ar: пропорции
+живые: .fx-flicker .fx-shake .fx-glitch (см. раздел ниже; .fx-float для .pic не годится — рамка режет)</pre>
+    </div>
+
+    <div class="demo">
+      <h3>.cutout — вырезка «из газеты» (рваный край запекается: src/cutout → tools/process.sh)</h3>
+      <figure class="cutout ex" style="--tilt: -2deg"><img src="img/milkchan.png" alt=""><figcaption>fig. 1 — подпись</figcaption></figure>
+<pre>&lt;figure class="cutout glitch" style="--x: 0px; --y: 600px; --w: 300px; --tilt: -2deg"&gt;
+  &lt;img src="img/имя.png" alt="…"&gt;
+  &lt;figcaption&gt;fig. 1 — подпись&lt;/figcaption&gt;
+&lt;/figure&gt;
+новая вырезка: файл в src/cutout/, строка в tools/cutouts.txt, ./tools/process.sh
+--w = ширина файла (колонка width в cutouts.txt), поле бумаги и seed разрыва — там же
+класс .fade добавляет растворение книзу</pre>
+    </div>
+
+    <div class="demo">
+      <h3>.ghost — призрак за полями (screen-blend, живёт в .ghosts, не в .stage)</h3>
+      <p class="ex">Пример — справа вверху этой страницы. Тёмный фон кадра исчезает, светлое просвечивает сквозь лес. Кладётся в <code>src/ghost/</code>, скрипт делает «чёрный пол».</p>
+<pre>&lt;div class="ghosts" aria-hidden="true"&gt;
+  &lt;figure class="ghost" style="--rx: -6%; --y: 9%; --w: 44%; --o: .85"&gt;&lt;img src="img/ghost-имя.jpg" alt=""&gt;&lt;/figure&gt;
+&lt;/div&gt;
+--x / --rx: отступ слева / справа   --y: сверху   --w: ширина   --o: прозрачность</pre>
+    </div>
+
+    <div class="demo">
+      <h3>.scrawl — свободный текст без рамок: .quote / .note / .meta</h3>
+      <blockquote class="scrawl quote ex" style="--tilt: -1.5deg">Where the pines are so thick the light comes down green<cite>— цитата, крупно</cite></blockquote>
+      <p class="scrawl note ex" style="--tilt: 1deg">Мысль на полях, средне, как карандашом.</p>
+      <p class="scrawl meta ex">47°N 121°W · rec 03:14 · служебное мелко</p>
+<pre>&lt;blockquote class="scrawl quote" style="--x: 420px; --y: 380px; --w: 560px; --tilt: -1.5deg"&gt;Текст&lt;cite&gt;— источник&lt;/cite&gt;&lt;/blockquote&gt;
+&lt;p class="scrawl note" style="--x: 120px; --y: 1000px; --w: 480px; --tilt: 1deg"&gt;Текст&lt;/p&gt;
+&lt;p class="scrawl meta" style="--x: 900px; --y: 1000px; --w: 360px"&gt;47°N 121°W · rec 03:14&lt;/p&gt;</pre>
+    </div>
+
+    <div class="demo">
+      <h3>.stamp, .b88 — штампы, гифки, кнопки 88×31</h3>
+      <div class="row ex">
+        <figure class="stamp" style="--w: 64px"><img src="img/cursor@2x.png" alt=""></figure>
+        <div class="buttons"><a class="b88 red" href="#">APPEAL TO HEAVEN</a><a class="b88" href="#">neocities</a><a class="b88 paper" href="#">no AI art</a></div>
+      </div>
+<pre>&lt;figure class="stamp" style="--x: 1200px; --y: 380px; --w: 96px; --tilt: 6deg"&gt;&lt;img src="img/гифка.gif" alt=""&gt;&lt;/figure&gt;
+&lt;a class="b88 red" href="#"&gt;текст&lt;/a&gt;      чужая кнопка: &lt;a class="b88" href="…"&gt;&lt;img src="img/их.gif" alt="…"&gt;&lt;/a&gt;
+гифки: src/stamp/*.gif копируются как есть (дизеринг убил бы анимацию)</pre>
+    </div>
+
+    <div class="demo">
+      <h3>.term + .cta, .ticker, .trails</h3>
+      <section class="field term ex"><h2>signal.exe</h2><p>&gt; status: online<span class="blink">_</span></p><a class="cta" href="#">кнопка</a></section>
+      <div class="ticker ex" aria-hidden="true"><span>бегущая строка · служебный текст · REC ●</span></div>
+      <nav class="trails ex"><ul><li><a href="#">якорь</a></li></ul></nav>
+<pre>&lt;section class="field term" style="--x: 320px; --y: 440px; --w: 360px"&gt;…&lt;a class="cta" href="https://t.me/…"&gt;войти в канал&lt;/a&gt;&lt;/section&gt;
+&lt;div class="ticker" style="--y: 40px; --m: 1" aria-hidden="true"&gt;&lt;span&gt;текст · текст&lt;/span&gt;&lt;/div&gt;
+&lt;nav class="trails" style="--x: 0px; --y: 140px; --w: 280px"&gt;&lt;ul&gt;&lt;li&gt;&lt;a href="#note"&gt;записка&lt;/a&gt;&lt;/li&gt;&lt;/ul&gt;&lt;/nav&gt;</pre>
+    </div>
+
+    <div class="demo">
+      <h3>афиша и колонка — два независимых режима одного HTML</h3>
+      <p class="ex"><strong>Афиша</strong> (окно шире порога): <code>.page</code> ровно <code>--poster</code> px, каждый блок стоит абсолютно по
+      <code>--x --y --w</code> в пикселях. Высоту холста задаёт подвал: он остаётся в потоке, его <code>--y</code> — это <code>margin-top</code>.
+      <strong>Колонка</strong> (телефон, узкие окна): блоки идут в потоке в порядке <code>--m</code> (меньше — выше), ширины по содержимому.
+      <code>hide-m</code> прячет блок в колонке, <code>hide-d</code> — на афише. Между режимами афиша уменьшается ступенями <code>zoom</code>
+      (.92 / .85 / .78) — смешивание призраков при этом работает (проверено в Firefox).<br>
+      Ширина афиши и превью телефона — в редакторе, кнопка «холст»: они пишутся в <code>tools/site.json</code>, из него сервер собирает
+      <code>layout.css</code> (пороги окна). Правила раскладки — в <code>style.css</code>, <code>layout.css</code> только переключает их.</p>
+<pre>&lt;section class="field hide-m" style="--x: 320px; --y: 140px; --w: 520px; --m: 3"&gt;только на афише&lt;/section&gt;
+&lt;p class="scrawl note hide-d" style="--m: 1"&gt;только в колонке (позиция не нужна)&lt;/p&gt;
+&lt;footer style="--y: 1600px"&gt;…&lt;/footer&gt;   ← нижний край холста
+каталог: &lt;main class="stage flow"&gt; — всегда колонка</pre>
+    </div>
+
+    <div class="demo">
+      <h3>живые эффекты на картинки: .fx-float .fx-flicker .fx-shake .fx-glitch</h3>
+      <div class="row ex">
+        <figure class="stamp fx-float" style="--w: 64px"><img src="img/cursor@2x.png" alt=""><figcaption>float</figcaption></figure>
+        <figure class="stamp fx-flicker" style="--w: 64px"><img src="img/cursor@2x.png" alt=""><figcaption>flicker</figcaption></figure>
+        <figure class="stamp fx-shake" style="--w: 64px"><img src="img/cursor@2x.png" alt=""><figcaption>shake</figcaption></figure>
+        <figure class="cutout fx-glitch fx-flicker" style="--w: 160px"><img src="img/milkchan.png" alt=""><figcaption>glitch + flicker</figcaption></figure>
+      </div>
+      <p class="ex">Вешаются на блок (вырезка, штамп, призрак, фото), действуют на его <code>img</code>, сочетаются друг с другом и со статичными
+      <code>.fx-crt .fx-channel .fx-stretch</code> и наведением <code>.glitch</code>. Покачивание и дрожь оба двигают картинку — вместе побеждает дрожь.
+      На <code>.pic</code> покачивание не ставится: рамка с <code>overflow: hidden</code> откроет пустые полосы. При «уменьшить движение» выключаются.</p>
+<pre>&lt;figure class="cutout fx-glitch fx-flicker" style="--x: 0px; --y: 600px; --w: 300px"&gt;…&lt;/figure&gt;</pre>
+    </div>
+
+    <div class="demo">
+      <h3>.reveal — появление из тумана при загрузке</h3>
+      <p class="ex">Добавь класс <code>reveal</code> любому блоку холста и <code>--delay: .3s</code> для очереди. На обёртки (.page .stage .ghosts) не вешать. При «уменьшить движение» выключается само.</p>
+<pre>&lt;section class="field reveal" style="--x: 320px; --y: 140px; --w: 520px; --delay: .2s"&gt;…&lt;/section&gt;</pre>
+    </div>
+
+    <div class="demo">
+      <h3>.dev — проявка: наложение, прозрачность, фильтры, зеркало</h3>
+      <p class="ex">Класс <code>dev</code> включает переменные на блоке: <code>--blend</code> (screen · multiply · overlay · soft-light · luminosity · difference),
+      <code>--op</code> 0–1, <code>--gray --sepia</code> 0–1, <code>--hue</code> в градусах, <code>--con</code> .5–2, <code>--blur</code> в px, <code>--inv</code> 1.
+      <code>--flip: -1</code> зеркалит только медиа (.frame, img вырезки и штампа), подписи не трогает. У призрака прозрачность остаётся <code>--o</code>.
+      Только на блоках .stage &gt; * и .ghost, никогда на обёртках (правило 2). В редакторе — секция «проявка» у любого блока.</p>
+<pre>&lt;figure class="field pic reveal dev" style="--x: 320px; --y: 620px; --w: 440px; --blend: multiply; --op: .8; --sepia: .4"&gt;…&lt;/figure&gt;</pre>
+    </div>
+
+    <div class="demo">
+      <h3>текст: цвета палитры, выравнивание, размер</h3>
+      <p class="ex">Внутри полей и свободного текста разрешены <code>strong em a ul li br p h2 cite</code> и <code>span</code> с классами
+      <code>c-paper c-mist c-fog c-blood</code> (цвет только классами, inline-цветов нет) плюс <code>blink</code>, <code>counter</code>.
+      На блоке: <code>--align: center|end</code>; у <code>.scrawl</code> ещё <code>--fs</code> (px) и <code>--ls</code> (em).
+      Ссылки — только https, mailto, #якорь или относительный путь. В редакторе: панель над текстом, Ctrl+K — ссылка.</p>
+<pre>&lt;p class="scrawl note" style="--align: center; --fs: 22px"&gt;мысль &lt;span class="c-blood"&gt;кровью&lt;/span&gt; и &lt;a href="#archive"&gt;ссылка&lt;/a&gt;&lt;/p&gt;</pre>
+    </div>
+
+    <div class="demo">
+      <h3>.field.embed — встраивание iframe (аудио-файлы на бесплатном тарифе нельзя, iframe можно)</h3>
+      <p class="ex">Bandcamp, SoundCloud, YouTube, Letterboxd, archive.org. Высота — <code>--h</code>. Проявка (<code>.dev</code>) применяется к iframe как к картинке:
+      <code>--sepia --con</code> кладут чужой плеер в палитру (проверить в своём браузере: кросс-доменный iframe и наложение). В редакторе вставь код embed или ссылку — src извлекается сам.</p>
+<pre>&lt;figure class="field embed reveal" style="--x: 320px; --y: 1100px; --w: 440px; --h: 240px"&gt;
+  &lt;iframe src="https://bandcamp.com/EmbeddedPlayer/…" loading="lazy" allow="fullscreen; encrypted-media" allowfullscreen
+          sandbox="allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox"&gt;&lt;/iframe&gt;
+  &lt;figcaption&gt;сейчас играет&lt;/figcaption&gt;
+&lt;/figure&gt;</pre>
+    </div>
+
+    <div class="demo">
+      <h3>страницы и общие блоки (.shared + id)</h3>
+      <p class="ex">Страница = <code>&lt;slug&gt;.html</code> в корне на тех же style.css и .ghosts. Блок с классом <code>shared</code> и <code>id</code> живёт на всех
+      страницах: при сохранении редактор копирует его содержимое и классы на остальные страницы, а положение (<code>--x/--y/--w/--m</code>, <code>hide-*</code>) у каждой страницы своё.
+      Нет на странице — вставляется перед подвалом. Удалить общий блок можно только на каждой странице отдельно. В index общие: masthead, ticker, trails, buttons, footer.</p>
+<pre>&lt;nav class="trails reveal shared" id="s-trails" style="--x: 0px; --y: 140px; --w: 280px"&gt;…&lt;/nav&gt;</pre>
+    </div>
+
+  </main>
+</div>
+<div class="grain" aria-hidden="true"></div>
+<div class="scanlines" aria-hidden="true"></div>
+<div class="vignette" aria-hidden="true"></div>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <filter id="channel" color-interpolation-filters="sRGB"><feColorMatrix type="matrix" values="0.10 0.20 0.90 0 0  0.15 0.85 0.10 0 0  0.80 0.10 0.20 0 0  0 0 0 1 0"/></filter>
+  <filter id="crt" color-interpolation-filters="sRGB">
+    <feOffset in="SourceGraphic" dx="2" dy="0" result="r"/><feColorMatrix in="r" type="matrix" values="1 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 1 0" result="rr"/>
+    <feOffset in="SourceGraphic" dx="-2" dy="0" result="b"/><feColorMatrix in="b" type="matrix" values="0 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 1 0" result="bb"/>
+    <feBlend in="rr" in2="bb" mode="screen"/>
+  </filter>
+</svg>
+</body>
+</html>

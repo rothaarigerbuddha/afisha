@@ -1,0 +1,78 @@
+<!doctype html><meta charset=utf-8><iframe id=ed src="/_editor/editor.html" style="width:2500px;height:1400px"></iframe>
+<script>
+const log = m => console.log('[T] ' + m), ok = (c, m) => log((c ? 'PASS ' : 'FAIL ') + m), sleep = ms => new Promise(r => setTimeout(r, ms));
+const ed = document.getElementById('ed'); let ran = false;
+ed.addEventListener('load', () => { if (ran) return; ran = true; setTimeout(run, 1500); });
+async function run() {
+  const W = ed.contentWindow, E = W.document, P = () => W.eval('doc'), canvas = E.getElementById('canvas'), ifr = E.getElementById('page'), sheet = E.getElementById('sheet');
+  try {
+  W.setZoom(1); await sleep(50);
+  const page = P().querySelector('.page'), L = P().querySelector('.ed-margin.l'), R = P().querySelector('.ed-margin.r'), F = P().querySelector('.ed-fold'), lab = P().querySelector('.ed-label');
+  ok(ifr.style.width === '1920px' && parseFloat(ifr.style.height) >= 1080, `лист ${ifr.style.width} × ${ifr.style.height}`);
+  ok(L && R && L.offsetWidth === 260 && R.offsetWidth === 260 && page.offsetLeft === 260, `поля по ${L && L.offsetWidth} px, страница с ${page.offsetLeft}`);
+  ok(F && F.offsetTop === 1080 && /1920×1080/.test(F.textContent), 'линия первого экрана на 1080: ' + (F && F.textContent));
+  ok(/афиша 1400 px · поля по 260 px/.test(lab.textContent), 'подпись: ' + lab.textContent);
+  const bg = W.getComputedStyle(P().querySelector('.bg')); ok(bg.position === 'absolute' && bg.backgroundRepeat === 'repeat-y', `фон в редакторе: ${bg.position} ${bg.backgroundRepeat}`);
+  // зум кнопками и хоткеями
+  E.getElementById('zoomout').click(); await sleep(30);
+  ok(Math.abs(W.eval('zoom') - .8) < .001 && sheet.style.width === '1536px' && /scale\(0\.8\)/.test(ifr.style.transform), `− → 80%: sheet ${sheet.style.width}, ${ifr.style.transform}, кнопка ${E.getElementById('zoom100').textContent}`);
+  E.body.dispatchEvent(new W.KeyboardEvent('keydown', { key: '0', ctrlKey: true, bubbles: true })); await sleep(30);
+  ok(W.eval('zoom') === 1 && sheet.style.width === '1920px', 'Ctrl+0 → 100%');
+  P().body.dispatchEvent(new W.KeyboardEvent('keydown', { key: '1', ctrlKey: true, bubbles: true })); await sleep(30);
+  const zf = W.eval('zoom'), zexp = Math.min((canvas.clientWidth - 80) / 1920, (canvas.clientHeight - 80) / parseFloat(ifr.style.height), 1); ok(Math.abs(zf - zexp) < .001 && sheet.offsetWidth <= canvas.clientWidth && sheet.offsetHeight <= canvas.clientHeight, `Ctrl+1 из iframe → вписать: ${Math.round(zf * 100)}% (${sheet.offsetWidth}×${sheet.offsetHeight} в ${canvas.clientWidth}×${canvas.clientHeight})`);
+  ok(W.localStorage.getItem('ed-zoom') !== null, 'зум запоминается в localStorage');
+  // Ctrl+колесо к курсору: точка листа под курсором остаётся на месте
+  W.setZoom(1.5); canvas.scrollLeft = 300; canvas.scrollTop = 200; await sleep(30);
+  const cr = canvas.getBoundingClientRect(), cx = cr.left + 400, cy = cr.top + 300;
+  log(`   dbg scroll ${canvas.scrollLeft},${canvas.scrollTop} sheet off ${sheet.offsetLeft},${sheet.offsetTop} size ${sheet.offsetWidth}x${sheet.offsetHeight} canvas ${canvas.clientWidth}x${canvas.clientHeight}`);
+  const before = { x: (canvas.scrollLeft + 400 - sheet.offsetLeft) / 1.5, y: (canvas.scrollTop + 300 - sheet.offsetTop) / 1.5 };
+  canvas.dispatchEvent(new W.WheelEvent('wheel', { deltaY: -100, ctrlKey: true, clientX: cx, clientY: cy, bubbles: true, cancelable: true })); await sleep(30);
+  const z2 = W.eval('zoom'), after = { x: (canvas.scrollLeft + 400 - sheet.offsetLeft) / z2, y: (canvas.scrollTop + 300 - sheet.offsetTop) / z2 };
+  log(`   dbg scroll ${canvas.scrollLeft},${canvas.scrollTop} sheet off ${sheet.offsetLeft},${sheet.offsetTop} size ${sheet.offsetWidth}x${sheet.offsetHeight}`);
+  ok(Math.abs(z2 - 1.65) < .001 && Math.abs(after.x - before.x) < 2 && Math.abs(after.y - before.y) < 2, `Ctrl+колесо: ${Math.round(z2 * 100)}%, якорь ${before.x.toFixed(0)},${before.y.toFixed(0)} → ${after.x.toFixed(0)},${after.y.toFixed(0)}`);
+  // колесо из iframe
+  const fr = ifr.getBoundingClientRect();
+  P().dispatchEvent(new W.WheelEvent('wheel', { deltaY: 100, ctrlKey: true, clientX: 500, clientY: 300, bubbles: true, cancelable: true })); await sleep(30);
+  ok(Math.abs(W.eval('zoom') - 1.5) < .001, 'Ctrl+колесо внутри листа: обратно к 150%');
+  // панорама: средняя кнопка на столе, пробел+тянуть внутри листа
+  W.setZoom(1.5); canvas.scrollLeft = 300; canvas.scrollTop = 200; await sleep(20);
+  const md = (t, type, x, y, extra) => t.dispatchEvent(new W.MouseEvent(type, Object.assign({ bubbles: true, cancelable: true, clientX: x, clientY: y, screenX: x, screenY: y, button: 0 }, extra)));
+  md(canvas, 'mousedown', cr.left + 10, cr.top + 10, { button: 1 }); md(E, 'mousemove', cr.left + 60, cr.top + 40); md(E, 'mouseup', cr.left + 60, cr.top + 40);
+  ok(canvas.scrollLeft === 250 && canvas.scrollTop === 170, `средняя кнопка: scroll 300,200 → ${canvas.scrollLeft},${canvas.scrollTop}`);
+  const note = P().getElementById('note'), x0 = W.placement(note).x;
+  P().body.dispatchEvent(new W.KeyboardEvent('keydown', { code: 'Space', key: ' ', bubbles: true, cancelable: true }));
+  const nr = note.getBoundingClientRect(); const tgt = P().elementFromPoint(nr.left + 40, nr.top + 30);
+  md(tgt, 'mousedown', nr.left + 40, nr.top + 30, { screenX: 1000, screenY: 900 }); md(P(), 'mousemove', nr.left + 90, nr.top + 30, { screenX: 1050, screenY: 900 }); md(P(), 'mouseup', nr.left + 90, nr.top + 30, { screenX: 1050, screenY: 900 });
+  P().body.dispatchEvent(new W.KeyboardEvent('keyup', { code: 'Space', key: ' ', bubbles: true }));
+  ok(canvas.scrollLeft === 200 && W.placement(note).x === x0, `пробел+тянуть внутри листа: scroll → ${canvas.scrollLeft}, блок не сдвинут (${x0} → ${W.placement(note).x})`);
+  ok(!canvas.classList.contains('pan') && !canvas.classList.contains('panning'), 'после отпускания курсор обычный');
+  // панели
+  E.getElementById('toggleL').click(); await sleep(30);
+  ok(E.body.classList.contains('no-left') && W.getComputedStyle(E.querySelector('.palette')).display === 'none' && E.defaultView.localStorage.getItem('ed-no-left') === '1', 'левая панель свёрнута и запомнена');
+  E.getElementById('toggleR').click(); await sleep(30);
+  ok(W.getComputedStyle(E.body).gridTemplateColumns.split(' ')[2] === '0px', 'правая панель свёрнута: колонки ' + W.getComputedStyle(E.body).gridTemplateColumns);
+  E.getElementById('toggleL').click(); E.getElementById('toggleR').click(); await sleep(30);
+  ok(!E.body.classList.contains('no-left') && !E.body.classList.contains('no-right'), 'панели развёрнуты обратно');
+  // телефон: полей нет, подпись колонки
+  E.getElementById('phone').click(); await sleep(400);
+  ok(L.hidden && F.hidden && /колонка 400 px/.test(lab.textContent) && ifr.style.width === '400px', 'телефон: поля и линия скрыты, ' + lab.textContent);
+  E.getElementById('phone').click(); await sleep(300);
+  // добавление блока при зуме 50% и прокрутке — в середину видимой части
+  W.setZoom(1.5); canvas.scrollTop = 300; await sleep(30);
+  const cr2 = canvas.getBoundingClientRect(), fr2 = ifr.getBoundingClientRect();
+  const expect = Math.max(0, Math.round((cr2.top + cr2.height / 2 - fr2.top) / 1.5 - W.eval('stage').offsetTop - 60));
+  E.querySelector('[data-add="meta"]').click(); await sleep(200);
+  const added = P().querySelectorAll('.scrawl.meta'); const py = W.placement(added[added.length - 1]).y;
+  ok(Math.abs(py - expect) < 3, `новый блок при 150% и прокрутке 300: y ${py} ≈ ${expect}`);
+  // настройки экрана
+  E.getElementById('canvasbtn').click(); await sleep(100);
+  ok(E.getElementById('s-screen').value === '1920' && E.getElementById('s-screenh').value === '1080', 'в «холсте» есть экран посетителя');
+  E.getElementById('s-screen').value = 1600; E.getElementById('s-screenh').value = 900; E.getElementById('s-scale').checked = false; E.getElementById('s-apply').click(); await sleep(2000);
+  W.setZoom(1); await sleep(50);
+  const L2 = P().querySelector('.ed-margin.l'), F2 = P().querySelector('.ed-fold');
+  ok(E.getElementById('page').style.width === '1600px' && L2.offsetWidth === 100 && F2.offsetTop === 900, `экран 1600×900: лист ${E.getElementById('page').style.width}, поля ${L2.offsetWidth}, линия ${F2.offsetTop}`);
+  const sj = (await (await fetch('/api/settings', { cache: 'no-store' })).json()).settings; ok(sj.screen === 1600 && sj.poster === 1400, 'site.json: ' + JSON.stringify(sj));
+  } catch (e) { log('ERROR ' + e + '\n' + e.stack); }
+  log('DONE');
+}
+</script>

@@ -1,0 +1,99 @@
+:root { --night:#0b1410; --pine:#1a2d24; --moss:#3b5646; --fog:#98aa9f; --mist:#dfe5df; --paper:#e8dfc9; --blood:#9b3a2a; }
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }   /* иначе display:flex у #modal/#textbar/#linkform перебивает атрибут hidden */
+html, body { margin: 0; height: 100%; }
+body {
+  background: var(--night); color: var(--mist);
+  font: 14px/1.4 system-ui, sans-serif;
+  display: grid; grid-template-columns: 210px 1fr 290px; grid-template-rows: 44px 1fr;
+  grid-template-areas: "bar bar bar" "palette canvas props";
+}
+body.no-left { grid-template-columns: 0 1fr 290px; } body.no-right { grid-template-columns: 210px 1fr 0; }
+body.no-left.no-right { grid-template-columns: 0 1fr 0; }
+body.no-left .palette, body.no-right .props { display: none; }
+#toggleL, #toggleR { padding: 5px 7px; } #toggleR { margin-left: 6px; }
+.zoom { display: flex; gap: 2px; } .zoom button { padding: 5px 7px; min-width: 30px; } #zoom100 { min-width: 54px; }
+.bar { grid-area: bar; display: flex; align-items: center; gap: 8px; padding: 0 12px; background: var(--pine); border-bottom: 1px solid var(--moss); }
+.bar strong { margin-right: 12px; color: var(--paper); font-weight: 500; }
+.status { margin-left: auto; color: var(--fog); font-size: 13px; }
+.status.err { color: #e0a090; }
+.help { color: var(--fog); margin-left: 12px; }
+button, select, input[type=text], input[type=number] {
+  font: inherit; color: var(--mist); background: var(--night); border: 1px solid var(--moss); padding: 5px 9px; border-radius: 2px;
+}
+button { cursor: pointer; }
+button:hover { border-color: var(--fog); }
+button.toggle.on { background: var(--moss); color: var(--paper); }
+button.danger { border-color: var(--blood); color: #e0a090; }
+.palette, .props { padding: 12px; overflow-y: auto; background: var(--pine); }
+.palette { grid-area: palette; border-right: 1px solid var(--moss); display: flex; flex-direction: column; gap: 6px; }
+.props { grid-area: props; border-left: 1px solid var(--moss); }
+h3 { margin: 10px 0 2px; font-size: 12px; text-transform: uppercase; letter-spacing: .08em; color: var(--fog); font-weight: 500; }
+.palette button { text-align: left; }
+.hint { color: var(--fog); font-size: 12px; margin: 4px 0; }
+code { color: var(--paper); }
+.drop { display: block; border: 1px dashed var(--fog); padding: 14px 8px; text-align: center; color: var(--fog); cursor: pointer; font-size: 12px; }
+.drop.over { border-color: var(--paper); color: var(--paper); background: rgba(232,223,201,.06); }
+.canvas { grid-area: canvas; overflow: auto; overflow-anchor: none; background: #06100b; position: relative; padding: 40px; }   /* без anchoring: иначе браузер сам сдвигает прокрутку после смены масштаба */
+.canvas.pan { cursor: grab; } .canvas.panning { cursor: grabbing; } .canvas.panning #page { pointer-events: none; }
+/* стол и лист: iframe шириной экрана посетителя (не меньше афиши + 16 px на полосу прокрутки, иначе
+   layout.css включит ступень zoom) и высотой во всю страницу; масштаб — transform на iframe, размеры #sheet
+   заданы явно, чтобы стол прокручивался */
+#sheet { position: relative; margin: 0 auto; box-shadow: 0 0 0 1px var(--moss), 0 12px 48px rgba(0,0,0,.65); }
+#page { border: 0; display: block; width: 1920px; height: 1080px; transform-origin: 0 0; background: var(--night); }
+/* панель свойств */
+.props .row { display: grid; grid-template-columns: 90px 1fr; gap: 6px 8px; align-items: center; margin: 4px 0; }
+.props .row label { color: var(--fog); font-size: 12px; }
+.props input[type=range] { width: 100%; }
+.props input[type=number] { width: 58px; padding: 4px 5px; }
+.props .pair { display: flex; gap: 6px; align-items: center; }
+.props .val { color: var(--paper); font-size: 12px; min-width: 42px; text-align: right; }
+.props .checks label { display: block; font-size: 13px; margin: 3px 0; }
+.props .actions { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; }
+.props textarea { width: 100%; font: inherit; color: var(--mist); background: var(--night); border: 1px solid var(--moss); padding: 5px; min-height: 48px; }
+.props .type { color: var(--paper); font-size: 13px; margin: 0 0 8px; }
+
+/* поиск гифок */
+#gcform { display: flex; gap: 4px; margin: 4px 0; }
+#gcform input { flex: 1; min-width: 0; background: var(--night); color: var(--mist); border: 1px solid var(--moss); padding: 4px 6px; font-size: 13px; }
+.gcgrid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; margin: 4px 0; }
+.gcgrid button { padding: 0; height: 58px; display: flex; align-items: center; justify-content: center; overflow: hidden; background: #06100b; border: 1px solid var(--moss); }
+.gcgrid button:hover { border-color: var(--paper); }
+.gcgrid button.busy { opacity: .4; pointer-events: none; }
+.gcgrid img { max-width: 100%; max-height: 100%; image-rendering: pixelated; }
+#gcmore { width: 100%; }
+
+/* панель текста над редактируемым блоком */
+#textbar { position: absolute; z-index: 5; display: flex; gap: 3px; align-items: center; padding: 4px; background: var(--pine); border: 1px solid var(--moss); box-shadow: 0 4px 14px rgba(0,0,0,.5); }
+#textbar button { padding: 2px 7px; font-size: 12px; }
+#textbar .sw { display: flex; gap: 3px; margin-left: 4px; }
+#textbar .sw button { width: 20px; height: 20px; padding: 0; border-radius: 50%; }
+#textbar [data-color="paper"] { background: var(--paper); } #textbar [data-color="mist"] { background: var(--mist); }
+#textbar [data-color="fog"] { background: var(--fog); } #textbar [data-color="blood"] { background: var(--blood); }
+#linkform { display: flex; gap: 3px; margin-left: 4px; }
+#linkform input { width: 220px; background: var(--night); color: var(--mist); border: 1px solid var(--moss); padding: 2px 5px; font-size: 12px; }
+
+/* модальные окна */
+#modal { position: fixed; inset: 0; z-index: 20; background: rgba(0,0,0,.6); display: flex; align-items: center; justify-content: center; }
+#modal .box { background: var(--pine); border: 1px solid var(--moss); width: min(960px, 94vw); max-height: 92vh; display: flex; flex-direction: column; }
+#modal .mhead { display: flex; justify-content: space-between; align-items: center; padding: 8px 12px; border-bottom: 1px solid var(--moss); color: var(--paper); }
+#mbody { overflow: auto; padding: 12px; }
+/* обрезка вырезки */
+.crop { display: grid; grid-template-columns: 1fr 230px; gap: 12px; }
+.crop canvas { background: #06100b; cursor: crosshair; max-width: 100%; }
+.crop .side .row { display: block; margin-bottom: 8px; }
+.crop .side label { display: block; color: var(--fog); font-size: 12px; }
+.crop .side input[type=range] { width: 100%; }
+.crop .side .actions { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 10px; }
+/* библиотека */
+.lib { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 8px; }
+.lib .it { border: 1px solid var(--moss); padding: 6px; font-size: 12px; color: var(--fog); }
+.lib .it .th { height: 90px; display: flex; align-items: center; justify-content: center; background: #06100b; margin-bottom: 4px; }
+.lib .it img { max-width: 100%; max-height: 100%; image-rendering: pixelated; }
+.lib .it .nm { color: var(--mist); word-break: break-all; }
+.lib .it .used { color: var(--paper); }
+.lib .it .acts { display: flex; gap: 4px; flex-wrap: wrap; margin-top: 4px; }
+.lib .it button { padding: 1px 6px; font-size: 11px; }
+.bk td { padding: 3px 10px 3px 0; color: var(--fog); font-size: 13px; }
+pre.files, #pushlog { font-size: 11px; color: var(--fog); max-height: 220px; overflow: auto; background: #06100b; padding: 6px; }
+#keyform { display: flex; gap: 4px; } #keyform input { flex: 1; background: var(--night); color: var(--mist); border: 1px solid var(--moss); padding: 3px 6px; }

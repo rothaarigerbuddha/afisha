@@ -164,7 +164,7 @@ def process_stamp(src, dst, p):
 
 def cursors(theme_cursors, img_dir):
     """Курсоры из ASCII ('#' бумага, 'o' чернила, '.' пусто), 1x и 2x."""
-    c = theme_cursors
+    c = theme_cursors; out = []
     for name in ('cursor', 'hand'):
         rows = c[name]['rows']; h, w = len(rows), len(rows[0]); draws = []
         for y in range(h):
@@ -173,11 +173,66 @@ def cursors(theme_cursors, img_dir):
                 if ch == '#': draws += ['-fill', c['paper'], '-draw', f'point {x},{y}']
                 if ch == 'o': draws += ['-fill', c['ink'], '-draw', f'point {x},{y}']
         for scale, suffix in ((1, ''), (2, '@2x')):
-            run(['-size', f'{w}x{h}', 'xc:none', *draws, '-scale', f'{scale * 100}%', str(Path(img_dir) / f'{name}{suffix}.png')], 'курсор ' + name)
+            run(['-size', f'{w}x{h}', 'xc:none', *draws, '-scale', f'{scale * 100}%', '-define', 'png:exclude-chunk=date,time,tIME', str(Path(img_dir) / f'{name}{suffix}.png')], 'курсор ' + name)
+            out.append(f'{name}{suffix}.png')
+    return out
+
+
+def _noise(seed, blur):
+    """Шум одной частоты поверх маски P: ( mpr:P -fill gray50 -colorize 100 -seed N +noise Random -colorspace gray -blur 0xB -normalize )."""
+    return ['(', 'mpr:P', '-fill', 'gray50', '-colorize', '100', '-seed', str(seed), '+noise', 'Random', '-colorspace', 'gray', '-blur', f'0x{blur:g}', '-normalize', ')']
+
+
+def _map(s1, s2):
+    """Карта смещения из двух частот шума (крупная 8 + мелкая 1, смешаны 18%)."""
+    return ['(', *_noise(s1, 8), *_noise(s2, 1), '-compose', 'Blend', '-define', 'compose:args=18', '-composite', '-normalize', ')']
+
+
+def cutout_args(src, dst, line, p, debug_dir=None):
+    """Аргументы magick для одной вырезки — дословно process.sh cutout(). Чистая функция (тестируется без запуска).
+    line: {crop{w,h,x,y}, fuzz, seeds[[x,y]], width, margin, seed}; p: theme.images.cutout.
+    Шаги: фигура (floodfill по точкам, resize, градуировка) → маска бумаги (Dilate на margin) → разрыв: маска
+    смещается шумом двух частот отдельно по X и по Y (Displace читает только красный канал) → Close/Open и
+    удаление островков → волокнистая кайма (T − Erode, промодулированная шумом) → сборка бумага+фигура →
+    ordered dither RGB → кайма цветом с решётки дизеринга → PNG8 без дат."""
+    M, seed, width = int(line['margin']), int(line['seed']), int(line['width'])
+    A = (M * 5 + 1) // 2                       # амплитуда разрыва = 2.5·margin
+    pad = M + A + 2; fw = width - 2 * pad
+    c = line['crop']; crop = f"{c['w']}x{c['h']}+{c['x']}+{c['y']}"
+    draws = []
+    for x, y in line['seeds']: draws += ['-draw', f'alpha {x},{y} floodfill']
+    dbg = lambda tag: ['-write', str(Path(debug_dir) / f"{line['name']}-{tag}.png")] if debug_dir else []
+    return [str(src), '-crop', crop, '+repage', '-fuzz', f"{line['fuzz']:g}%", '-fill', 'none', *draws,
+            '-channel', 'A', '-morphology', 'Open', 'Disk:1.5', '+channel', '-trim', '+repage', '-resize', f'{fw}x',
+            '-channel', 'RGB', '-modulate', p['desaturate'], '-level', p['level'], '-fill', p['tint'], '-colorize', f"{p['tint_pct']}%", '+channel',
+            '-bordercolor', 'none', '-border', str(pad), '-write', 'mpr:fig', '-alpha', 'extract', *dbg('A'),
+            '-morphology', 'Dilate', f'Disk:{M}', '-threshold', '50%', '-write', 'mpr:P', '-blur', '0x1',
+            *_map(seed, seed + 1), '-compose', 'Displace', '-define', f'compose:args={A}x0', '-composite', '-threshold', '50%',
+            *_map(seed + 2, seed + 3), '-compose', 'Displace', '-define', f'compose:args=0x{A}', '-composite', '-threshold', '50%',
+            '-morphology', 'Close', 'Disk:3', '-morphology', 'Open', 'Disk:2',
+            '-define', 'connected-components:area-threshold=150', '-define', 'connected-components:mean-color=true', '-connected-components', '4', '-threshold', '50%',
+            '-write', 'mpr:T', *dbg('T'),
+            '(', 'mpr:T', '-morphology', 'Erode', 'Disk:3', ')', '-compose', 'MinusSrc', '-composite',
+            '(', *_noise(seed + 4, 0.8), '-threshold', '45%', ')', '-compose', 'Multiply', '-composite',
+            '(', 'mpr:T', '(', 'mpr:T', '-morphology', 'Erode', 'Disk:1', ')', '-compose', 'MinusSrc', '-composite', ')', '-compose', 'Lighten', '-composite',
+            '-write', 'mpr:F', *dbg('F'), '+delete',
+            '(', 'mpr:P', '-fill', p['paper'], '-colorize', '100', ')', *_noise(seed + 5, 0.5), '-compose', 'Blend', '-define', 'compose:args=6', '-composite',
+            'mpr:T', '-alpha', 'off', '-compose', 'CopyOpacity', '-composite',
+            'mpr:fig', '-compose', 'Over', '-composite',
+            '-channel', 'RGB', '-ordered-dither', p['dither'], '+channel',
+            '(', 'mpr:P', '-fill', p['edge'], '-colorize', '100', ')', 'mpr:F', '-compose', 'Over', '-composite',
+            '-colors', str(p['colors']), '-define', 'png:format=png8', '-define', 'png:exclude-chunk=date,time,tIME', str(dst)]
 
 
 def process_cutout(site, line, p, debug_dir=None):
-    raise ApiError('вырезки пока не перенесены на новый конвейер', 'следующий шаг afisha')
+    name = line['name']
+    srcs = list((site.src / 'cutout').glob(f'{name}.*'))
+    if len(srcs) != 1: raise ApiError(f'вырезка {name}: найдено {len(srcs)} источников в src/cutout (нужен ровно один)')
+    if MAGICK is None:
+        if srcs[0].suffix.lower() == '.png': copy_asis(srcs[0], site.img / f'{name}.png'); return
+        raise ApiError(f'вырезке {name} нужен ImageMagick (или готовый PNG с прозрачностью)', MAGICK_HINT)
+    if not line.get('crop'): raise ApiError(f'вырезка {name}: плохой crop в _afisha/cutouts.txt')
+    run(cutout_args(srcs[0], site.img / f'{name}.png', line, p, debug_dir), 'вырезка ' + name)
 
 
 def process_all(site, images=None, cursors_cfg=None, active_bg=None, only=None, debug_dir=None):
@@ -212,7 +267,7 @@ def process_all(site, images=None, cursors_cfg=None, active_bg=None, only=None, 
             else: fn(f, dst, images[typ])
             written.append(dst.name)
     if cursors_cfg and MAGICK and (only is None or 'cursors' in only):
-        cursors(cursors_cfg, site.img)
+        written += cursors(cursors_cfg, site.img)
     if warnings: print('[process] ' + '; '.join(warnings))
     return written
 

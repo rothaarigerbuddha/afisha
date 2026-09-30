@@ -33,6 +33,19 @@ Keep the site folder close to the drive root (`C:\sites\my-site`): long paths ma
 `./start.sh <site folder>` or `python3 afisha.py <site folder>`. ImageMagick comes from your package manager
 (`imagemagick` 7.x; on Debian/Ubuntu check that `magick` exists, not only `convert`).
 
+## How to use
+
+1. `python3 afisha.py new ~/my-site --title "my site"` — a site folder from the "forest" template (dark forest,
+   dithering, ghosts; the template images are generated procedurally, replace them with your own).
+2. `python3 afisha.py ~/my-site` — the editor opens. Left: blocks and image upload; centre: the desk with the sheet
+   (Ctrl+wheel — zoom, space+drag — pan); right: properties of the selected block.
+3. Blocks are dragged around the poster (the magnet snaps to neighbours, Shift disables it), text is edited by
+   double-click, images are dropped onto the left panel and go through processing (dithering, torn cutout edges).
+4. "phone" — the layout for narrow screens: block order and what to hide. "canvas" — poster width. "theme" —
+   colours, fonts, background, screen layers. Ctrl+S — save (backups in `_afisha/backups/`).
+5. "publish" — upload to Neocities with an API key (stored only in `_afisha/neocities.key`). Without Neocities the
+   site folder is a ready static site: `index.html`, `style.css`, `theme.css`, `layout.css`, `fonts/`, `img/`.
+
 ## Site folder
 
 ```
